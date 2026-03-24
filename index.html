@@ -81,11 +81,15 @@ const program = {
 function updateView() {
     const day = document.getElementById('dayToggle').value;
     const container = document.getElementById('workoutContent');
-    container.innerHTML = program[day].map(ex => `
+    container.innerHTML = program[day].map(ex => {
+        // Denne linjen finner URL-er og gjør dem om til klikkbare lenker
+        const formattedDesc = ex.d.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color: var(--primary); font-weight: bold;">Se video her</a>');
+
+        return `
         <div class="card">
             <span class="ex-title">${ex.t}</span>
             <div class="ex-info">${ex.i}</div>
-            <div class="ex-desc">${ex.d}</div>
+            <div class="ex-desc">${formattedDesc}</div>
             <div class="input-row">
                 <input type="number" id="in-${ex.id}" placeholder="Vekt" inputmode="decimal">
                 <button class="btn-save" onclick="save('${ex.id}')">Lagre</button>
@@ -97,7 +101,7 @@ function updateView() {
                 <div id="hist-list-${ex.id}"></div>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 function save(id) {
