@@ -3,23 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NSF Logg m/Bedlington</title>
+    <title>Ragnhild Supersterk v2</title>
     <style>
         :root { --primary: #c0392b; --secondary: #2c3e50; --card: rgba(255, 255, 255, 0.92); }
-        
         body { 
             font-family: -apple-system, system-ui, sans-serif; 
-            margin: 0; 
-            padding: 10px;
-            min-height: 100vh;
-            /* HER HENTES BILDET FRA SAMME MAPPE */
+            margin: 0; padding: 10px; min-height: 100vh;
             background: url('bedlington.jpg') no-repeat center center fixed; 
             background-size: cover;
         }
-
         .header { text-align: center; padding: 15px 0; background: rgba(44, 62, 80, 0.85); color: white; border-radius: 8px; margin-bottom: 20px; }
         .container { max-width: 500px; margin: auto; }
-        select { width: 100%; padding: 15px; border-radius: 8px; font-size: 16px; margin-bottom: 20px; border: none; background: white; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        
+        /* Dag-velger knapper */
+        .day-selector { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        .btn-day { 
+            width: 60px; height: 60px; border-radius: 50%; border: none; 
+            background: white; color: var(--secondary); font-weight: bold; 
+            font-size: 1.2em; box-shadow: 0 4px 6px rgba(0,0,0,0.2); cursor: pointer; transition: 0.2s;
+        }
+        .btn-day.active { background: var(--primary); color: white; transform: scale(1.1); }
+
         .card { background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); border-left: 5px solid var(--primary); }
         .ex-title { font-weight: bold; color: var(--secondary); font-size: 1.1em; display: block; margin-bottom: 5px; }
         .ex-info { font-size: 0.9em; color: #444; margin-bottom: 5px; font-weight: 600; }
@@ -31,30 +35,31 @@
         .btn-small { background: #95a5a6; font-size: 0.75em; padding: 5px 10px; border: none; color: white; border-radius: 4px; }
         .history-area { margin-top: 10px; padding: 10px; background: #fdfdfd; border-radius: 5px; display: none; border: 1px solid #ddd; }
         .history-item { font-size: 0.8em; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 4px 0; }
+        
+        .video-link { color: var(--primary); font-weight: bold; text-decoration: underline; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h2 style="margin:0">Ragnhild blir supersterk</h2>
-        <p style="margin:5px 0 0 0">❤️❤️❤️❤️❤️❤️🐾</p>
+        <h2 style="margin:0">Ragnhild Supersterk</h2>
+        <p style="margin:5px 0 0 0">Pust ut og tren tungt! ❤️🐾</p>
     </div>
 
-    <select id="dayToggle" onchange="updateView()">
-        <option value="1">Mandag: Tung bøy & Press</option>
-        <option value="2">Onsdag: Teknikk & Mark</option>
-        <option value="3">Fredag: Mengde & Variant</option>
-    </select>
+    <div class="day-selector">
+        <button id="btn-1" class="btn-day" onclick="updateView('1')">1</button>
+        <button id="btn-2" class="btn-day" onclick="updateView('2')">2</button>
+        <button id="btn-3" class="btn-day" onclick="updateView('3')">3</button>
+    </div>
 
     <div id="workoutContent"></div>
 </div>
 
 <script>
-// (Samme logikk som sist, bare med nsf_v4 lagring)
 const program = {
     "1": [
-        { id: "m1", t: "Pust & Kontroll", i: "3x10", d: "Aktiver dyp kjerne med utpust. Liggende på rygg, bøyde knær og flate føtter på bakken :-D" },
+        { id: "m1", t: "Pust & Kontroll", i: "3x10", d: "Aktiver dyp kjerne med utpust. Ligg på rygg, bøyde knær." },
         { id: "m2", t: "Sittende Roing", i: "3x10-12", d: "Godt grep, brystet frem." },
         { id: "m3", t: "Gående utfall", i: "3x10 per bein", d: "Hold manualer i hendene (lavt tyngdepunkt)." },
         { id: "m4", t: "Benkpress m/stopp", i: "3x8", d: "Husk å puste ut på vei opp!" },
@@ -62,28 +67,34 @@ const program = {
         { id: "m6", t: "Sittende skulderpress", i: "3x8-10", d: "Ryggstøtte reduserer buktrykket." }
     ],
     "2": [
-        { id: "o1", t: "Dead bugs", i: "3x10", d: "Kjernestyrke uten press." },
+        { id: "o1", t: "Dead bugs", i: "3x10", d: "Kjernestyrke uten press. Motsatt arm/bein ned." },
         { id: "o2", t: "Nedtrekk (bredt)", i: "3x10", d: "Fokus på kontakt med lats." },
         { id: "o3", t: "Leg Extension", i: "3x12", d: "Isolert trening av fremside lår." },
         { id: "o4", t: "Skråbenk m/manualer", i: "3x10", d: "Grei vinkel for skuldre og bryst." },
         { id: "o5", t: "Facepulls", i: "3x15", d: "Holdning og bakside skuldre." }
     ],
     "3": [
-        { id: "f1", t: "Planke på knær/tær", i: "3x30 sek", d: "Hold spennet, ikke hold pusten." },
-        { id: "f2", t: "Hip Thrust (lett/moderat)", i: "3x12", d: "Fokus på kontakt med setet." },
-        { id: "f3", t: "Bulgarsk utfall", i: "3x8 per bein", d: "Ett og ett bein er tryggere enn bøy, https://www.youtube.com/watch?v=aobvXAySqhc ." },
+        { id: "f1", t: "Planke på knær/tær", i: "3x30 sek", d: "Hold spennet, ikke hold pusten!" },
+        { id: "f2", t: "Hip Thrust (Maskin)", i: "3x12", d: "Fokus på kontakt med setet. Skvis på topp." },
+        { id: "f3", t: "Bulgarsk utfall", i: "3x8 per bein", d: "Ett og ett bein er tryggere enn bøy. Video: https://www.youtube.com/watch?v=aobvXAySqhc" },
         { id: "f4", t: "Smal benkpress", i: "3x10", d: "Triceps og bryst." },
         { id: "f5", t: "Sittende lårcurl", i: "3x12", d: "Bakside lår." },
         { id: "f6", t: "Sidehev m/manualer", i: "3x12-15", d: "Skuldre." }
     ]
 };
 
-function updateView() {
-    const day = document.getElementById('dayToggle').value;
+function updateView(day) {
+    // Lagre valgt dag i localStorage
+    localStorage.setItem('nsf_last_day', day);
+    
+    // Oppdater knapper
+    document.querySelectorAll('.btn-day').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn-' + day).classList.add('active');
+
     const container = document.getElementById('workoutContent');
     container.innerHTML = program[day].map(ex => {
-        // Denne linjen finner URL-er og gjør dem om til klikkbare lenker
-        const formattedDesc = ex.d.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color: var(--primary); font-weight: bold;">Se video her</a>');
+        // Gjør URL-er klikkbare
+        const formattedDesc = ex.d.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="video-link">Se video</a>');
 
         return `
         <div class="card">
@@ -92,7 +103,7 @@ function updateView() {
             <div class="ex-desc">${formattedDesc}</div>
             <div class="input-row">
                 <input type="number" id="in-${ex.id}" placeholder="Vekt" inputmode="decimal">
-                <button class="btn-save" onclick="save('${ex.id}')">Lagre</button>
+                <button class="btn-save" onclick="save('${ex.id}', '${day}')">Lagre</button>
             </div>
             <div class="footer-btns">
                 <button class="btn-small" onclick="toggleHistory('${ex.id}')">Logg</button>
@@ -104,7 +115,7 @@ function updateView() {
     `}).join('');
 }
 
-function save(id) {
+function save(id, day) {
     const val = document.getElementById('in-' + id).value;
     if(!val) return;
     const date = new Date().toLocaleDateString('no-NO', {day:'2-digit', month:'2-digit'});
@@ -112,7 +123,8 @@ function save(id) {
     history.unshift({ weight: val, date: date });
     localStorage.setItem('nsf_v4_' + id, JSON.stringify(history.slice(0,5)));
     document.getElementById('in-' + id).value = '';
-    alert("Lagret " + val + "kg");
+    alert("Lagret " + val + " kg");
+    updateView(day); // Forfrisk visning
 }
 
 function toggleHistory(id) {
@@ -125,7 +137,10 @@ function toggleHistory(id) {
         list.innerHTML = hist.map(h => `<div class="history-item"><span>${h.date}</span><strong>${h.weight} kg</strong></div>`).join('') || 'Ingen logg';
     }
 }
-updateView();
+
+// Ved oppstart: Sjekk om vi husker en dag fra sist, ellers velg dag 1
+const savedDay = localStorage.getItem('nsf_last_day') || '1';
+updateView(savedDay);
 </script>
 </body>
 </html>
