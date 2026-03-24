@@ -31,8 +31,13 @@
         .input-row { display: flex; gap: 10px; margin-top: 10px; }
         input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
         .btn-save { padding: 10px 15px; background: var(--primary); color: white; border: none; border-radius: 5px; font-weight: bold; }
-        .footer-btns { display: flex; gap: 10px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
+        
+        .footer-btns { display: flex; align-items: center; gap: 10px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
         .btn-small { background: #95a5a6; font-size: 0.75em; padding: 5px 10px; border: none; color: white; border-radius: 4px; }
+        
+        /* Stil for dato-visning */
+        .last-date { font-size: 0.75em; color: #7f8c8d; font-weight: bold; }
+        
         .history-area { margin-top: 10px; padding: 10px; background: #fdfdfd; border-radius: 5px; display: none; border: 1px solid #ddd; }
         .history-item { font-size: 0.8em; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 4px 0; }
         
@@ -84,16 +89,17 @@ const program = {
 };
 
 function updateView(day) {
-    // Lagre valgt dag i localStorage
     localStorage.setItem('nsf_last_day', day);
     
-    // Oppdater knapper
     document.querySelectorAll('.btn-day').forEach(b => b.classList.remove('active'));
     document.getElementById('btn-' + day).classList.add('active');
 
     const container = document.getElementById('workoutContent');
     container.innerHTML = program[day].map(ex => {
-        // Gjør URL-er klikkbare
+        // Hent siste dato fra lokal historikk
+        const hist = JSON.parse(localStorage.getItem('nsf_v4_' + ex.id)) || [];
+        const lastDate = hist.length > 0 ? hist[0].date : "Ingen logg";
+
         const formattedDesc = ex.d.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="video-link">Se video</a>');
 
         return `
@@ -107,6 +113,7 @@ function updateView(day) {
             </div>
             <div class="footer-btns">
                 <button class="btn-small" onclick="toggleHistory('${ex.id}')">Logg</button>
+                <span class="last-date">Sist: ${lastDate}</span>
             </div>
             <div class="history-area" id="hist-area-${ex.id}">
                 <div id="hist-list-${ex.id}"></div>
@@ -123,8 +130,9 @@ function save(id, day) {
     history.unshift({ weight: val, date: date });
     localStorage.setItem('nsf_v4_' + id, JSON.stringify(history.slice(0,5)));
     document.getElementById('in-' + id).value = '';
-    alert("Lagret " + val + " kg");
-    updateView(day); // Forfrisk visning
+    
+    // Oppdatert visning for å få med den nye datoen med en gang
+    updateView(day); 
 }
 
 function toggleHistory(id) {
@@ -138,7 +146,6 @@ function toggleHistory(id) {
     }
 }
 
-// Ved oppstart: Sjekk om vi husker en dag fra sist, ellers velg dag 1
 const savedDay = localStorage.getItem('nsf_last_day') || '1';
 updateView(savedDay);
 </script>
