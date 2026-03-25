@@ -5,50 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ragnhild Supersterk v2</title>
     <style>
-        :root { --primary: #c0392b; --secondary: #2c3e50; --card: rgba(255, 255, 255, 0.92); }
+        :root { --primary: #e67e22; /* En litt varmere oransjerød farge for "pote-vibes" */ --secondary: #2c3e50; --card: rgba(255, 255, 255, 0.95); }
         body { 
             font-family: -apple-system, system-ui, sans-serif; 
             margin: 0; padding: 10px; min-height: 100vh;
             background: url('bedlington.jpg') no-repeat center center fixed; 
             background-size: cover;
         }
-        .header { text-align: center; padding: 15px 0; background: rgba(44, 62, 80, 0.85); color: white; border-radius: 8px; margin-bottom: 20px; }
+        .header { text-align: center; padding: 15px 0; background: rgba(44, 62, 80, 0.85); color: white; border-radius: 12px; margin-bottom: 20px; }
         .container { max-width: 500px; margin: auto; }
         
-        /* Oppdatert CSS for hundepote-knapper */
-        .day-selector { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        /* Søte hundepote-knapper */
+        .day-selector { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; }
+        
         .btn-day { 
-            width: 70px; height: 70px; border: none; background: none; cursor: pointer; transition: 0.2s; padding: 0;
-            position: relative; color: var(--secondary); font-weight: bold; font-size: 1.4em;
+            width: 75px; height: 75px; border: none; background: none; cursor: pointer; transition: all 0.2s ease; padding: 0;
+            position: relative; color: #7f8c8d; font-weight: 900; font-size: 1.5em;
         }
         
-        /* Selve hundepoten (SVG) */
-        .btn-day svg { width: 100%; height: 100%; fill: white; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); transition: 0.2s; }
+        /* Pote-ikonet */
+        .btn-day svg { 
+            width: 100%; height: 100%; 
+            fill: #ffffff; 
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); 
+            transition: 0.3s; 
+        }
         
-        /* Tallet inni poten */
-        .btn-day span { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -40%); z-index: 10; }
+        /* Tallet inni hovedputen */
+        .btn-day span { 
+            position: absolute; 
+            top: 55%; left: 50%; 
+            transform: translate(-50%, -50%); 
+            z-index: 10;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+        }
 
-        /* Aktiv/trykket knapp: rød pote, hvit tekst */
-        .btn-day.active svg { fill: var(--primary); transform: scale(1.05); }
+        /* Når knappen er aktiv */
+        .btn-day.active svg { 
+            fill: var(--primary); 
+            transform: scale(1.1) rotate(-5deg); 
+            filter: drop-shadow(0 6px 12px rgba(230, 126, 34, 0.4));
+        }
         .btn-day.active { color: white; }
+        .btn-day.active span { text-shadow: none; }
 
-        .card { background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); border-left: 5px solid var(--primary); }
-        .ex-title { font-weight: bold; color: var(--secondary); font-size: 1.1em; display: block; margin-bottom: 5px; }
-        .ex-info { font-size: 0.9em; color: #444; margin-bottom: 5px; font-weight: 600; }
-        .ex-desc { font-size: 0.85em; color: #666; margin-bottom: 10px; line-height: 1.3; font-style: italic; }
+        /* Kortene og resten av stilen */
+        .card { background: var(--card); border-radius: 15px; padding: 18px; margin-bottom: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border-left: 6px solid var(--primary); }
+        .ex-title { font-weight: bold; color: var(--secondary); font-size: 1.15em; display: block; margin-bottom: 5px; }
+        .ex-info { font-size: 0.95em; color: #2c3e50; margin-bottom: 5px; font-weight: 700; }
+        .ex-desc { font-size: 0.85em; color: #555; margin-bottom: 12px; line-height: 1.4; font-style: italic; }
+        
         .input-row { display: flex; gap: 10px; margin-top: 10px; }
-        input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
-        .btn-save { padding: 10px 15px; background: var(--primary); color: white; border: none; border-radius: 5px; font-weight: bold; }
+        input { flex: 1; padding: 12px; border: 2px solid #eee; border-radius: 8px; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--primary); }
         
-        .footer-btns { display: flex; align-items: center; gap: 10px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
-        .btn-small { background: #95a5a6; font-size: 0.75em; padding: 5px 10px; border: none; color: white; border-radius: 4px; }
+        .btn-save { padding: 10px 18px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
         
-        .last-date { font-size: 0.75em; color: #7f8c8d; font-weight: bold; }
+        .footer-btns { display: flex; align-items: center; gap: 10px; margin-top: 12px; border-top: 1px solid #eee; padding-top: 10px; }
+        .btn-small { background: #bdc3c7; font-size: 0.8em; padding: 6px 12px; border: none; color: white; border-radius: 6px; cursor: pointer; }
+        .last-date { font-size: 0.8em; color: #95a5a6; font-weight: bold; }
         
-        .history-area { margin-top: 10px; padding: 10px; background: #fdfdfd; border-radius: 5px; display: none; border: 1px solid #ddd; }
-        .history-item { font-size: 0.8em; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 4px 0; }
-        
-        .video-link { color: var(--primary); font-weight: bold; text-decoration: underline; }
+        .history-area { margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 8px; display: none; border: 1px solid #eee; }
+        .history-item { font-size: 0.85em; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 6px 0; }
+        .video-link { color: var(--primary); font-weight: bold; text-decoration: none; border-bottom: 1px dashed var(--primary); }
     </style>
 </head>
 <body>
@@ -56,20 +75,33 @@
 <div class="container">
     <div class="header">
         <h2 style="margin:0">Ragnhild Supersterk</h2>
-        <p style="margin:5px 0 0 0">Pust ut og tren tungt! ❤️🐾</p>
+        <p style="margin:5px 0 0 0">Pust ut og tren smart! ❤️🐾</p>
     </div>
 
     <div class="day-selector">
         <button id="btn-1" class="btn-day" onclick="updateView('1')">
-            <svg viewBox="0 0 512 512"><path d="M256 160c19.9 0 37.2 11.9 44.1 30.1c11 29.1 43 41.6 67.8 26.6c20.7-12.5 45.4-18.7 70.3-17.7C476.1 200.7 512 232.8 512 271.1c0 30.6-22.1 56.4-52 61.1c-14 2.2-22.2 16-17.4 29c11.6 31.4 18 64.9 18 99.4c0 28.3-22.9 51.2-51.2 51.2c-29.2 0-57.5-6.8-82.6-19c-16.1-7.8-35.3-6.5-50.2 3.4L256 512l-18.7-15.8c-14.9-9.9-34.1-11.2-50.2-3.4c-25.1 12.2-53.4 19-82.6 19c-28.3 0-51.2-22.9-51.2-51.2c0-34.5 6.4-68 18-99.4c4.8-13-3.4-26.8-17.4-29c-29.9-4.7-52-30.5-52-61.1c0-38.3 35.9-70.4 73.8-72.1c24.9-1.1 49.6 5.1 70.3 17.7c24.8 15 56.8 2.5 67.8-26.6c6.9-18.2 24.2-30.1 44.1-30.1zM112 112c0 30.9-25.1 56-56 56S0 142.9 0 112s25.1-56 56-56s56 25.1 56 56zm120-16c0 35.3-28.7 64-64 64s-64-28.7-64-64s28.7-64 64-64s64 28.7 64 64zm184 64c-30.9 0-56-25.1-56-56s25.1-56 56-56s56 25.1 56 56s-25.1 56-56 56zm80-16c0 35.3-28.7 64-64 64s-64-28.7-64-64s28.7-64 64-64s64 28.7 64 64z"/></svg>
+            <svg viewBox="0 0 512 512">
+                <circle cx="256" cy="350" r="110" /> <circle cx="120" cy="220" r="45" />  <circle cx="210" cy="150" r="50" />  <circle cx="305" cy="150" r="50" />  <circle cx="395" cy="220" r="45" />  </svg>
             <span>1</span>
         </button>
         <button id="btn-2" class="btn-day" onclick="updateView('2')">
-            <svg viewBox="0 0 512 512"><path d="M256 160c19.9 0 37.2 11.9 44.1 30.1c11 29.1 43 41.6 67.8 26.6c20.7-12.5 45.4-18.7 70.3-17.7C476.1 200.7 512 232.8 512 271.1c0 30.6-22.1 56.4-52 61.1c-14 2.2-22.2 16-17.4 29c11.6 31.4 18 64.9 18 99.4c0 28.3-22.9 51.2-51.2 51.2c-29.2 0-57.5-6.8-82.6-19c-16.1-7.8-35.3-6.5-50.2 3.4L256 512l-18.7-15.8c-14.9-9.9-34.1-11.2-50.2-3.4c-25.1 12.2-53.4 19-82.6 19c-28.3 0-51.2-22.9-51.2-51.2c0-34.5 6.4-68 18-99.4c4.8-13-3.4-26.8-17.4-29c-29.9-4.7-52-30.5-52-61.1c0-38.3 35.9-70.4 73.8-72.1c24.9-1.1 49.6 5.1 70.3 17.7c24.8 15 56.8 2.5 67.8-26.6c6.9-18.2 24.2-30.1 44.1-30.1zM112 112c0 30.9-25.1 56-56 56S0 142.9 0 112s25.1-56 56-56s56 25.1 56 56zm120-16c0 35.3-28.7 64-64 64s-64-28.7-64-64s28.7-64 64-64s64 28.7 64 64zm184 64c-30.9 0-56-25.1-56-56s25.1-56 56-56s56 25.1 56 56s-25.1 56-56 56zm80-16c0 35.3-28.7 64-64 64s-64-28.7-64-64s28.7-64 64-64s64 28.7 64 64z"/></svg>
+            <svg viewBox="0 0 512 512">
+                <circle cx="256" cy="350" r="110" />
+                <circle cx="120" cy="220" r="45" />
+                <circle cx="210" cy="150" r="50" />
+                <circle cx="305" cy="150" r="50" />
+                <circle cx="395" cy="220" r="45" />
+            </svg>
             <span>2</span>
         </button>
         <button id="btn-3" class="btn-day" onclick="updateView('3')">
-            <svg viewBox="0 0 512 512"><path d="M256 160c19.9 0 37.2 11.9 44.1 30.1c11 29.1 43 41.6 67.8 26.6c20.7-12.5 45.4-18.7 70.3-17.7C476.1 200.7 512 232.8 512 271.1c0 30.6-22.1 56.4-52 61.1c-14 2.2-22.2 16-17.4 29c11.6 31.4 18 64.9 18 99.4c0 28.3-22.9 51.2-51.2 51.2c-29.2 0-57.5-6.8-82.6-19c-16.1-7.8-35.3-6.5-50.2 3.4L256 512l-18.7-15.8c-14.9-9.9-34.1-11.2-50.2-3.4c-25.1 12.2-53.4 19-82.6 19c-28.3 0-51.2-22.9-51.2-51.2c0-34.5 6.4-68 18-99.4c4.8-13-3.4-26.8-17.4-29c-29.9-4.7-52-30.5-52-61.1c0-38.3 35.9-70.4 73.8-72.1c24.9-1.1 49.6 5.1 70.3 17.7c24.8 15 56.8 2.5 67.8-26.6c6.9-18.2 24.2-30.1 44.1-30.1zM112 112c0 30.9-25.1 56-56 56S0 142.9 0 112s25.1-56 56-56s56 25.1 56 56zm120-16c0 35.3-28.7 64-64 64s-64-28.7-64-64s28.7-64 64-64s64 28.7 64 64zm184 64c-30.9 0-56-25.1-56-56s25.1-56 56-56s56 25.1 56 56s-25.1 56-56 56zm80-16c0 35.3-28.7 64-64 64s-64-28.7-64-64s28.7-64 64-64s64 28.7 64 64z"/></svg>
+            <svg viewBox="0 0 512 512">
+                <circle cx="256" cy="350" r="110" />
+                <circle cx="120" cy="220" r="45" />
+                <circle cx="210" cy="150" r="50" />
+                <circle cx="305" cy="150" r="50" />
+                <circle cx="395" cy="220" r="45" />
+            </svg>
             <span>3</span>
         </button>
     </div>
@@ -78,29 +110,30 @@
 </div>
 
 <script>
+// Programmet er det samme som før
 const program = {
     "1": [
-        { id: "m1", t: "Pust & Kontroll", i: "3x10", d: "Aktiver dyp kjerne med utpust. Ligg på rygg, bøyde knær, Video: https://www.youtube.com/watch?v=d7fbiUEs_0U&t=224s" },
+        { id: "m1", t: "Pust & Kontroll", i: "3x10", d: "Aktiver dyp kjerne med utpust. Video: https://www.youtube.com/watch?v=d7fbiUEs_0U&t=224s" },
         { id: "m2", t: "Sittende Roing", i: "3x10-12", d: "Godt grep, brystet frem." },
-        { id: "m3", t: "Gående utfall", i: "3x10 per bein", d: "Hold manualer i hendene (lavt tyngdepunkt)." },
-        { id: "m4", t: "Benkpress m/stopp", i: "3x8", d: "Husk å puste ut på vei opp!" },
+        { id: "m3", t: "Gående utfall", i: "3x10 per bein", d: "Hold manualer i hendene." },
+        { id: "m4", t: "Benkpress m/stopp", i: "3x8", d: "Pust ut på vei opp!" },
         { id: "m5", t: "Liggende lårcurl", i: "3x10-12", d: "Bakside lår uten ryggbelastning." },
-        { id: "m6", t: "Sittende skulderpress", i: "3x8-10", d: "Ryggstøtte reduserer buktrykket." }
+        { id: "m6", t: "Sittende skulderpress", i: "3x8-10", d: "Ryggstøtte er viktig her." }
     ],
     "2": [
-        { id: "o1", t: "Dead bugs", i: "3x10", d: "Kjernestyrke uten press. Motsatt arm/bein ned. Video: https://www.youtube.com/watch?v=g_BYB0R-4Ws" },
-        { id: "o2", t: "Nedtrekk (bredt)", i: "3x10", d: "Fokus på kontakt med lats." },
-        { id: "o3", t: "Leg Extension", i: "3x12", d: "Isolert trening av fremside lår." },
-        { id: "o4", t: "Skråbenk m/manualer", i: "3x10", d: "Grei vinkel for skuldre og bryst." },
-        { id: "o5", t: "Facepulls", i: "3x15", d: "Holdning og bakside skuldre." }
+        { id: "o1", t: "Dead bugs", i: "3x10", d: "Kjernestyrke uten press. Video: https://www.youtube.com/watch?v=g_BYB0R-4Ws" },
+        { id: "o2", t: "Nedtrekk (bredt)", i: "3x10", d: "Trekk mot øvre bryst." },
+        { id: "o3", t: "Leg Extension", i: "3x12", d: "Fremside lår i maskin." },
+        { id: "o4", t: "Skråbenk m/manualer", i: "3x10", d: "Pust ut på vei opp." },
+        { id: "o5", t: "Facepulls", i: "3x15", d: "Bakside skuldre." }
     ],
     "3": [
-        { id: "f1", t: "Planke på knær/tær", i: "3x30 sek", d: "Hold spennet, ikke hold pusten!" },
-        { id: "f2", t: "Hip Thrust (Maskin)", i: "3x12", d: "Fokus på kontakt med setet. Skvis på topp." },
-        { id: "f3", t: "Bulgarsk utfall", i: "3x8 per bein", d: "Ett og ett bein er tryggere enn bøy. Video: https://www.youtube.com/watch?v=aobvXAySqhc" },
-        { id: "f4", t: "Smal benkpress", i: "3x10", d: "Triceps og bryst." },
+        { id: "f1", t: "Planke på knær/tær", i: "3x30 sek", d: "Jevn pust hele veien." },
+        { id: "f2", t: "Hip Thrust (Maskin)", i: "3x12", d: "Skvis rumpa! Video: https://www.youtube.com/watch?v=SEdqd1n01Iw" },
+        { id: "f3", t: "Bulgarsk utfall", i: "3x8 per bein", d: "Bakre fot på benk. Video: https://www.youtube.com/watch?v=aobvXAySqhc" },
+        { id: "f4", t: "Smal benkpress", i: "3x10", d: "Tette albuer." },
         { id: "f5", t: "Sittende lårcurl", i: "3x12", d: "Bakside lår." },
-        { id: "f6", t: "Sidehev m/manualer", i: "3x12-15", d: "Skuldre." }
+        { id: "f6", t: "Sidehev m/manualer", i: "3x12-15", d: "Kontrollerte bevegelser." }
     ]
 };
 
@@ -114,7 +147,6 @@ function updateView(day) {
     container.innerHTML = program[day].map(ex => {
         const hist = JSON.parse(localStorage.getItem('nsf_v4_' + ex.id)) || [];
         const lastDate = hist.length > 0 ? hist[0].date : "Ingen logg";
-
         const formattedDesc = ex.d.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="video-link">Se video</a>');
 
         return `
@@ -145,15 +177,13 @@ function save(id, day) {
     history.unshift({ weight: val, date: date });
     localStorage.setItem('nsf_v4_' + id, JSON.stringify(history.slice(0,5)));
     document.getElementById('in-' + id).value = '';
-    
     updateView(day); 
 }
 
 function toggleHistory(id) {
     const area = document.getElementById('hist-area-' + id);
-    if(area.style.display === 'block') { area.style.display = 'none'; } 
-    else { 
-        area.style.display = 'block';
+    area.style.display = (area.style.display === 'block') ? 'none' : 'block';
+    if(area.style.display === 'block') {
         const list = document.getElementById('hist-list-' + id);
         const hist = JSON.parse(localStorage.getItem('nsf_v4_' + id)) || [];
         list.innerHTML = hist.map(h => `<div class="history-item"><span>${h.date}</span><strong>${h.weight} kg</strong></div>`).join('') || 'Ingen logg';
