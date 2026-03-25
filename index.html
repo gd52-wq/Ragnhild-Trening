@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ragnhild Supersterk v2</title>
     <style>
-        :root { --primary: #e67e22; /* En litt varmere oransjerød farge for "pote-vibes" */ --secondary: #2c3e50; --card: rgba(255, 255, 255, 0.95); }
+        :root { --primary: #e67e22; --secondary: #2c3e50; --card: rgba(255, 255, 255, 0.95); }
         body { 
             font-family: -apple-system, system-ui, sans-serif; 
             margin: 0; padding: 10px; min-height: 100vh;
@@ -15,41 +15,16 @@
         .header { text-align: center; padding: 15px 0; background: rgba(44, 62, 80, 0.85); color: white; border-radius: 12px; margin-bottom: 20px; }
         .container { max-width: 500px; margin: auto; }
         
-        /* Søte hundepote-knapper */
         .day-selector { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; }
-        
         .btn-day { 
             width: 75px; height: 75px; border: none; background: none; cursor: pointer; transition: all 0.2s ease; padding: 0;
             position: relative; color: #7f8c8d; font-weight: 900; font-size: 1.5em;
         }
-        
-        /* Pote-ikonet */
-        .btn-day svg { 
-            width: 100%; height: 100%; 
-            fill: #ffffff; 
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); 
-            transition: 0.3s; 
-        }
-        
-        /* Tallet inni hovedputen */
-        .btn-day span { 
-            position: absolute; 
-            top: 55%; left: 50%; 
-            transform: translate(-50%, -50%); 
-            z-index: 10;
-            text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
-        }
-
-        /* Når knappen er aktiv */
-        .btn-day.active svg { 
-            fill: var(--primary); 
-            transform: scale(1.1) rotate(-5deg); 
-            filter: drop-shadow(0 6px 12px rgba(230, 126, 34, 0.4));
-        }
+        .btn-day svg { width: 100%; height: 100%; fill: #ffffff; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); transition: 0.3s; }
+        .btn-day span { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%); z-index: 10; }
+        .btn-day.active svg { fill: var(--primary); transform: scale(1.1) rotate(-5deg); }
         .btn-day.active { color: white; }
-        .btn-day.active span { text-shadow: none; }
 
-        /* Kortene og resten av stilen */
         .card { background: var(--card); border-radius: 15px; padding: 18px; margin-bottom: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border-left: 6px solid var(--primary); }
         .ex-title { font-weight: bold; color: var(--secondary); font-size: 1.15em; display: block; margin-bottom: 5px; }
         .ex-info { font-size: 0.95em; color: #2c3e50; margin-bottom: 5px; font-weight: 700; }
@@ -59,8 +34,10 @@
         input { flex: 1; padding: 12px; border: 2px solid #eee; border-radius: 8px; font-size: 16px; outline: none; }
         input:focus { border-color: var(--primary); }
         
+        /* Gjør placeholder-teksten litt tydeligere */
+        input::placeholder { color: #95a5a6; font-style: italic; font-size: 0.9em; }
+
         .btn-save { padding: 10px 18px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        
         .footer-btns { display: flex; align-items: center; gap: 10px; margin-top: 12px; border-top: 1px solid #eee; padding-top: 10px; }
         .btn-small { background: #bdc3c7; font-size: 0.8em; padding: 6px 12px; border: none; color: white; border-radius: 6px; cursor: pointer; }
         .last-date { font-size: 0.8em; color: #95a5a6; font-weight: bold; }
@@ -80,28 +57,15 @@
 
     <div class="day-selector">
         <button id="btn-1" class="btn-day" onclick="updateView('1')">
-            <svg viewBox="0 0 512 512">
-                <circle cx="256" cy="350" r="110" /> <circle cx="120" cy="220" r="45" />  <circle cx="210" cy="150" r="50" />  <circle cx="305" cy="150" r="50" />  <circle cx="395" cy="220" r="45" />  </svg>
+            <svg viewBox="0 0 512 512"><circle cx="256" cy="350" r="110" /><circle cx="120" cy="220" r="45" /><circle cx="210" cy="150" r="50" /><circle cx="305" cy="150" r="50" /><circle cx="395" cy="220" r="45" /></svg>
             <span>1</span>
         </button>
         <button id="btn-2" class="btn-day" onclick="updateView('2')">
-            <svg viewBox="0 0 512 512">
-                <circle cx="256" cy="350" r="110" />
-                <circle cx="120" cy="220" r="45" />
-                <circle cx="210" cy="150" r="50" />
-                <circle cx="305" cy="150" r="50" />
-                <circle cx="395" cy="220" r="45" />
-            </svg>
+            <svg viewBox="0 0 512 512"><circle cx="256" cy="350" r="110" /><circle cx="120" cy="220" r="45" /><circle cx="210" cy="150" r="50" /><circle cx="305" cy="150" r="50" /><circle cx="395" cy="220" r="45" /></svg>
             <span>2</span>
         </button>
         <button id="btn-3" class="btn-day" onclick="updateView('3')">
-            <svg viewBox="0 0 512 512">
-                <circle cx="256" cy="350" r="110" />
-                <circle cx="120" cy="220" r="45" />
-                <circle cx="210" cy="150" r="50" />
-                <circle cx="305" cy="150" r="50" />
-                <circle cx="395" cy="220" r="45" />
-            </svg>
+            <svg viewBox="0 0 512 512"><circle cx="256" cy="350" r="110" /><circle cx="120" cy="220" r="45" /><circle cx="210" cy="150" r="50" /><circle cx="305" cy="150" r="50" /><circle cx="395" cy="220" r="45" /></svg>
             <span>3</span>
         </button>
     </div>
@@ -110,7 +74,6 @@
 </div>
 
 <script>
-// Programmet er det samme som før
 const program = {
     "1": [
         { id: "m1", t: "Pust & Kontroll", i: "3x10", d: "Aktiver dyp kjerne med utpust. Video: https://www.youtube.com/watch?v=d7fbiUEs_0U&t=224s" },
@@ -146,7 +109,14 @@ function updateView(day) {
     const container = document.getElementById('workoutContent');
     container.innerHTML = program[day].map(ex => {
         const hist = JSON.parse(localStorage.getItem('nsf_v4_' + ex.id)) || [];
+        
+        // Finn siste vekt og dato
+        const lastWeight = hist.length > 0 ? hist[0].weight : "";
         const lastDate = hist.length > 0 ? hist[0].date : "Ingen logg";
+        
+        // Lag placeholder-tekst
+        const placeholderText = lastWeight ? `Sist: ${lastWeight} kg` : "Vekt";
+
         const formattedDesc = ex.d.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="video-link">Se video</a>');
 
         return `
@@ -155,12 +125,12 @@ function updateView(day) {
             <div class="ex-info">${ex.i}</div>
             <div class="ex-desc">${formattedDesc}</div>
             <div class="input-row">
-                <input type="number" id="in-${ex.id}" placeholder="Vekt" inputmode="decimal">
+                <input type="number" id="in-${ex.id}" placeholder="${placeholderText}" inputmode="decimal">
                 <button class="btn-save" onclick="save('${ex.id}', '${day}')">Lagre</button>
             </div>
             <div class="footer-btns">
                 <button class="btn-small" onclick="toggleHistory('${ex.id}')">Logg</button>
-                <span class="last-date">Sist: ${lastDate}</span>
+                <span class="last-date">Dato: ${lastDate}</span>
             </div>
             <div class="history-area" id="hist-area-${ex.id}">
                 <div id="hist-list-${ex.id}"></div>
