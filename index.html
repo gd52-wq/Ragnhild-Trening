@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ragnhild Supersterk v2</title>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
         :root { --primary: #e67e22; --secondary: #2c3e50; --card: rgba(255, 255, 255, 0.95); }
         body { 
@@ -33,8 +34,6 @@
         .input-row { display: flex; gap: 10px; margin-top: 10px; }
         input { flex: 1; padding: 12px; border: 2px solid #eee; border-radius: 8px; font-size: 16px; outline: none; }
         input:focus { border-color: var(--primary); }
-        
-        /* Gjør placeholder-teksten litt tydeligere */
         input::placeholder { color: #95a5a6; font-style: italic; font-size: 0.9em; }
 
         .btn-save { padding: 10px 18px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
@@ -43,6 +42,9 @@
         .last-date { font-size: 0.8em; color: #95a5a6; font-weight: bold; }
         
         .history-area { margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 8px; display: none; border: 1px solid #eee; }
+        /* Stil for selve graf-boksen */
+        .chart-div { width: 100%; height: 150px; margin-bottom: 10px; border-radius: 5px; overflow: hidden; }
+        
         .history-item { font-size: 0.85em; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 6px 0; }
         .video-link { color: var(--primary); font-weight: bold; text-decoration: none; border-bottom: 1px dashed var(--primary); }
     </style>
@@ -52,7 +54,7 @@
 <div class="container">
     <div class="header">
         <h2 style="margin:0">Ragnhild Supersterk</h2>
-        <p style="margin:5px 0 0 0">Pust ut og tren smart! ❤️🐾</p>
+        <p style="margin:5px 0 0 0">Se fremgangen din! ❤️🐾</p>
     </div>
 
     <div class="day-selector">
@@ -74,6 +76,9 @@
 </div>
 
 <script>
+// Initialiser Google Charts
+google.charts.load('current', {'packages':['corechart']});
+
 const program = {
     "1": [
         { id: "m1", t: "Pust & Kontroll", i: "3x10", d: "Aktiver dyp kjerne med utpust. Video: https://www.youtube.com/watch?v=d7fbiUEs_0U&t=224s" },
@@ -102,21 +107,15 @@ const program = {
 
 function updateView(day) {
     localStorage.setItem('nsf_last_day', day);
-    
     document.querySelectorAll('.btn-day').forEach(b => b.classList.remove('active'));
     document.getElementById('btn-' + day).classList.add('active');
 
     const container = document.getElementById('workoutContent');
     container.innerHTML = program[day].map(ex => {
         const hist = JSON.parse(localStorage.getItem('nsf_v4_' + ex.id)) || [];
-        
-        // Finn siste vekt og dato
         const lastWeight = hist.length > 0 ? hist[0].weight : "";
         const lastDate = hist.length > 0 ? hist[0].date : "Ingen logg";
-        
-        // Lag placeholder-tekst
         const placeholderText = lastWeight ? `Sist: ${lastWeight} kg` : "Vekt";
-
         const formattedDesc = ex.d.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="video-link">Se video</a>');
 
         return `
@@ -129,10 +128,11 @@ function updateView(day) {
                 <button class="btn-save" onclick="save('${ex.id}', '${day}')">Lagre</button>
             </div>
             <div class="footer-btns">
-                <button class="btn-small" onclick="toggleHistory('${ex.id}')">Logg</button>
+                <button class="btn-small" onclick="toggleHistory('${ex.id}', '${ex.t}')">Logg & Graf</button>
                 <span class="last-date">Dato: ${lastDate}</span>
             </div>
             <div class="history-area" id="hist-area-${ex.id}">
+                <div id="chart-${ex.id}" class="chart-div"></div>
                 <div id="hist-list-${ex.id}"></div>
             </div>
         </div>
@@ -144,16 +144,46 @@ function save(id, day) {
     if(!val) return;
     const date = new Date().toLocaleDateString('no-NO', {day:'2-digit', month:'2-digit'});
     let history = JSON.parse(localStorage.getItem('nsf_v4_' + id)) || [];
-    history.unshift({ weight: val, date: date });
-    localStorage.setItem('nsf_v4_' + id, JSON.stringify(history.slice(0,5)));
+    history.unshift({ weight: parseFloat(val), date: date });
+    localStorage.setItem('nsf_v4_' + id, JSON.stringify(history.slice(0,10))); // Lagrer 10 for bedre grafer
     document.getElementById('in-' + id).value = '';
     updateView(day); 
 }
 
-function toggleHistory(id) {
+function drawChart(id, title) {
+    const hist = JSON.parse(localStorage.getItem('nsf_v4_' + id)) || [];
+    if (hist.length < 2) return; // Trenger minst to punkter for en graf
+
+    const dataArray = [['Dato', 'Kg']];
+    // Snu historikken for å vise eldste først i grafen
+    [...hist].reverse().forEach(h => {
+        dataArray.push([h.date, parseFloat(h.weight)]);
+    });
+
+    const data = google.visualization.arrayToDataTable(dataArray);
+    const options = {
+        title: 'Progresjon: ' + title,
+        curveType: 'function',
+        legend: { position: 'none' },
+        colors: ['#e67e22'],
+        backgroundColor: 'transparent',
+        chartArea: { width: '85%', height: '70%' },
+        vAxis: { gridlines: { color: '#eee' } }
+    };
+
+    const chart = new google.visualization.LineChart(document.getElementById('chart-' + id));
+    chart.draw(data, options);
+}
+
+function toggleHistory(id, title) {
     const area = document.getElementById('hist-area-' + id);
-    area.style.display = (area.style.display === 'block') ? 'none' : 'block';
-    if(area.style.display === 'block') {
+    const isOpen = area.style.display === 'block';
+    area.style.display = isOpen ? 'none' : 'block';
+    
+    if(!isOpen) {
+        // Tegn grafen når feltet åpnes
+        setTimeout(() => drawChart(id, title), 100);
+        
         const list = document.getElementById('hist-list-' + id);
         const hist = JSON.parse(localStorage.getItem('nsf_v4_' + id)) || [];
         list.innerHTML = hist.map(h => `<div class="history-item"><span>${h.date}</span><strong>${h.weight} kg</strong></div>`).join('') || 'Ingen logg';
