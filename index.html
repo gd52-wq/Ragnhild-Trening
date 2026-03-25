@@ -6,7 +6,7 @@
     <title>Ragnhild Supersterk v2</title>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
-        :root { --primary: #e67e22; --secondary: #2c3e50; --card: rgba(255, 255, 255, 0.95); }
+        :root { --primary: #e67e22; --secondary: #2c3e50; --card: rgba(255, 255, 255, 0.95); --success: #27ae60; }
         body { 
             font-family: -apple-system, system-ui, sans-serif; 
             margin: 0; padding: 10px; min-height: 100vh;
@@ -31,20 +31,39 @@
         .ex-info { font-size: 0.95em; color: #2c3e50; margin-bottom: 5px; font-weight: 700; }
         .ex-desc { font-size: 0.85em; color: #555; margin-bottom: 12px; line-height: 1.4; font-style: italic; }
         
-        .input-row { display: flex; gap: 10px; margin-top: 10px; }
-        input { flex: 1; padding: 12px; border: 2px solid #eee; border-radius: 8px; font-size: 16px; outline: none; }
-        input:focus { border-color: var(--primary); }
-        input::placeholder { color: #95a5a6; font-style: italic; font-size: 0.9em; }
+        .input-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+        input { flex: 1; padding: 12px; border: 2px solid #eee; border-radius: 8px; font-size: 16px; outline: none; width: 60px; }
+        
+        .btn-save { padding: 12px 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        /* Pause-knapp stil */
+        .btn-timer { 
+            padding: 12px 10px; 
+            background: var(--secondary); 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 0.8em; 
+            font-weight: bold; 
+            cursor: pointer; 
+            min-width: 85px;
+            white-space: nowrap;
+        }
+        .btn-timer.running { background: #7f8c8d; }
+        .btn-timer.finished { background: var(--success); animation: pulse 1s infinite; }
 
-        .btn-save { padding: 10px 18px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
         .footer-btns { display: flex; align-items: center; gap: 10px; margin-top: 12px; border-top: 1px solid #eee; padding-top: 10px; }
         .btn-small { background: #bdc3c7; font-size: 0.8em; padding: 6px 12px; border: none; color: white; border-radius: 6px; cursor: pointer; }
         .last-date { font-size: 0.8em; color: #95a5a6; font-weight: bold; }
         
         .history-area { margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 8px; display: none; border: 1px solid #eee; }
-        /* Stil for selve graf-boksen */
         .chart-div { width: 100%; height: 150px; margin-bottom: 10px; border-radius: 5px; overflow: hidden; }
-        
         .history-item { font-size: 0.85em; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 6px 0; }
         .video-link { color: var(--primary); font-weight: bold; text-decoration: none; border-bottom: 1px dashed var(--primary); }
     </style>
@@ -54,7 +73,7 @@
 <div class="container">
     <div class="header">
         <h2 style="margin:0">Ragnhild Supersterk</h2>
-        <p style="margin:5px 0 0 0">Se fremgangen din! ❤️🐾</p>
+        <p style="margin:5px 0 0 0">Pust, løft, gjenta! ❤️🐾</p>
     </div>
 
     <div class="day-selector">
@@ -76,32 +95,34 @@
 </div>
 
 <script>
-// Initialiser Google Charts
 google.charts.load('current', {'packages':['corechart']});
+
+// Timer-logikk
+let activeTimers = {};
 
 const program = {
     "1": [
-        { id: "m1", t: "Pust & Kontroll", i: "3x10", d: "Aktiver dyp kjerne med utpust. Video: https://www.youtube.com/watch?v=d7fbiUEs_0U&t=224s" },
-        { id: "m2", t: "Sittende Roing", i: "3x10-12", d: "Godt grep, brystet frem." },
-        { id: "m3", t: "Gående utfall", i: "3x10 per bein", d: "Hold manualer i hendene." },
-        { id: "m4", t: "Benkpress m/stopp", i: "3x8", d: "Pust ut på vei opp!" },
-        { id: "m5", t: "Liggende lårcurl", i: "3x10-12", d: "Bakside lår uten ryggbelastning." },
-        { id: "m6", t: "Sittende skulderpress", i: "3x8-10", d: "Ryggstøtte er viktig her." }
+        { id: "m1", t: "Pust & Kontroll", i: "3x10", d: "Aktiver dyp kjerne med utpust.", timer: false },
+        { id: "m2", t: "Sittende Roing", i: "3x10-12", d: "Godt grep, brystet frem.", timer: true },
+        { id: "m3", t: "Gående utfall", i: "3x10 per bein", d: "Hold manualer, ta pause mellom bein/sett.", timer: true },
+        { id: "m4", t: "Benkpress m/stopp", i: "3x8", d: "Husk 1 sek stopp på brystet.", timer: true },
+        { id: "m5", t: "Liggende lårcurl", i: "3x10-12", d: "Kontrollert tempo.", timer: false },
+        { id: "m6", t: "Sittende skulderpress", i: "3x8-10", d: "Ikke hold pusten!", timer: true }
     ],
     "2": [
-        { id: "o1", t: "Dead bugs", i: "3x10", d: "Kjernestyrke uten press. Video: https://www.youtube.com/watch?v=g_BYB0R-4Ws" },
-        { id: "o2", t: "Nedtrekk (bredt)", i: "3x10", d: "Trekk mot øvre bryst." },
-        { id: "o3", t: "Leg Extension", i: "3x12", d: "Fremside lår i maskin." },
-        { id: "o4", t: "Skråbenk m/manualer", i: "3x10", d: "Pust ut på vei opp." },
-        { id: "o5", t: "Facepulls", i: "3x15", d: "Bakside skuldre." }
+        { id: "o1", t: "Dead bugs", i: "3x10", d: "Kjernefokus.", timer: false },
+        { id: "o2", t: "Nedtrekk (bredt)", i: "3x10", d: "Trekk mot bryst.", timer: true },
+        { id: "o3", t: "Leg Extension", i: "3x12", d: "Fremside lår.", timer: false },
+        { id: "o4", t: "Skråbenk m/manualer", i: "3x10", d: "Viktig med kontroll.", timer: true },
+        { id: "o5", t: "Facepulls", i: "3x15", d: "Holdning.", timer: false }
     ],
     "3": [
-        { id: "f1", t: "Planke på knær/tær", i: "3x30 sek", d: "Jevn pust hele veien." },
-        { id: "f2", t: "Hip Thrust (Maskin)", i: "3x12", d: "Skvis rumpa! Video: https://www.youtube.com/watch?v=SEdqd1n01Iw" },
-        { id: "f3", t: "Bulgarsk utfall", i: "3x8 per bein", d: "Bakre fot på benk. Video: https://www.youtube.com/watch?v=aobvXAySqhc" },
-        { id: "f4", t: "Smal benkpress", i: "3x10", d: "Tette albuer." },
-        { id: "f5", t: "Sittende lårcurl", i: "3x12", d: "Bakside lår." },
-        { id: "f6", t: "Sidehev m/manualer", i: "3x12-15", d: "Kontrollerte bevegelser." }
+        { id: "f1", t: "Planke på knær/tær", i: "3x30 sek", d: "Hold spennet.", timer: false },
+        { id: "f2", t: "Hip Thrust (Maskin)", i: "3x12", d: "Dagens viktigste! Ta pause.", timer: true },
+        { id: "f3", t: "Bulgarsk utfall", i: "3x8 per bein", d: "Tungt for beina.", timer: true },
+        { id: "f4", t: "Smal benkpress", i: "3x10", d: "Fokus på triceps.", timer: true },
+        { id: "f5", t: "Sittende lårcurl", i: "3x12", d: "Bakside lår.", timer: false },
+        { id: "f6", t: "Sidehev m/manualer", i: "3x12-15", d: "Små muskelgrupper.", timer: false }
     ]
 };
 
@@ -115,7 +136,7 @@ function updateView(day) {
         const hist = JSON.parse(localStorage.getItem('nsf_v4_' + ex.id)) || [];
         const lastWeight = hist.length > 0 ? hist[0].weight : "";
         const lastDate = hist.length > 0 ? hist[0].date : "Ingen logg";
-        const placeholderText = lastWeight ? `Sist: ${lastWeight} kg` : "Vekt";
+        const placeholderText = lastWeight ? `Sist: ${lastWeight}` : "Kg";
         const formattedDesc = ex.d.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="video-link">Se video</a>');
 
         return `
@@ -126,6 +147,7 @@ function updateView(day) {
             <div class="input-row">
                 <input type="number" id="in-${ex.id}" placeholder="${placeholderText}" inputmode="decimal">
                 <button class="btn-save" onclick="save('${ex.id}', '${day}')">Lagre</button>
+                ${ex.timer ? `<button id="timer-${ex.id}" class="btn-timer" onclick="startTimer('${ex.id}')">Pause 2m</button>` : ''}
             </div>
             <div class="footer-btns">
                 <button class="btn-small" onclick="toggleHistory('${ex.id}', '${ex.t}')">Logg & Graf</button>
@@ -139,38 +161,57 @@ function updateView(day) {
     `}).join('');
 }
 
+function startTimer(id) {
+    if (activeTimers[id]) return; // Forhindre flere timere på samme øvelse
+
+    const btn = document.getElementById('timer-' + id);
+    let timeLeft = 120; // 2 minutter
+
+    btn.classList.add('running');
+    btn.classList.remove('finished');
+    
+    activeTimers[id] = setInterval(() => {
+        timeLeft--;
+        let mins = Math.floor(timeLeft / 60);
+        let secs = timeLeft % 60;
+        btn.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+        if (timeLeft <= 0) {
+            clearInterval(activeTimers[id]);
+            delete activeTimers[id];
+            btn.innerText = "KLAR!";
+            btn.classList.remove('running');
+            btn.classList.add('finished');
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]); // Vibrer når ferdig
+        }
+    }, 1000);
+}
+
 function save(id, day) {
     const val = document.getElementById('in-' + id).value;
     if(!val) return;
     const date = new Date().toLocaleDateString('no-NO', {day:'2-digit', month:'2-digit'});
     let history = JSON.parse(localStorage.getItem('nsf_v4_' + id)) || [];
     history.unshift({ weight: parseFloat(val), date: date });
-    localStorage.setItem('nsf_v4_' + id, JSON.stringify(history.slice(0,10))); // Lagrer 10 for bedre grafer
+    localStorage.setItem('nsf_v4_' + id, JSON.stringify(history.slice(0,10)));
     document.getElementById('in-' + id).value = '';
     updateView(day); 
 }
 
 function drawChart(id, title) {
     const hist = JSON.parse(localStorage.getItem('nsf_v4_' + id)) || [];
-    if (hist.length < 2) return; // Trenger minst to punkter for en graf
-
+    if (hist.length < 2) return;
     const dataArray = [['Dato', 'Kg']];
-    // Snu historikken for å vise eldste først i grafen
-    [...hist].reverse().forEach(h => {
-        dataArray.push([h.date, parseFloat(h.weight)]);
-    });
-
+    [...hist].reverse().forEach(h => dataArray.push([h.date, parseFloat(h.weight)]));
     const data = google.visualization.arrayToDataTable(dataArray);
     const options = {
-        title: 'Progresjon: ' + title,
+        title: title,
         curveType: 'function',
         legend: { position: 'none' },
         colors: ['#e67e22'],
         backgroundColor: 'transparent',
-        chartArea: { width: '85%', height: '70%' },
-        vAxis: { gridlines: { color: '#eee' } }
+        chartArea: { width: '85%', height: '70%' }
     };
-
     const chart = new google.visualization.LineChart(document.getElementById('chart-' + id));
     chart.draw(data, options);
 }
@@ -179,11 +220,8 @@ function toggleHistory(id, title) {
     const area = document.getElementById('hist-area-' + id);
     const isOpen = area.style.display === 'block';
     area.style.display = isOpen ? 'none' : 'block';
-    
     if(!isOpen) {
-        // Tegn grafen når feltet åpnes
         setTimeout(() => drawChart(id, title), 100);
-        
         const list = document.getElementById('hist-list-' + id);
         const hist = JSON.parse(localStorage.getItem('nsf_v4_' + id)) || [];
         list.innerHTML = hist.map(h => `<div class="history-item"><span>${h.date}</span><strong>${h.weight} kg</strong></div>`).join('') || 'Ingen logg';
