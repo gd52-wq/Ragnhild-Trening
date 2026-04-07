@@ -6,7 +6,7 @@
     <title>Ragnhild Supersterk Pro</title>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
-        :root { --primary: #e67e22; --secondary: #2c3e50; --card: rgba(255, 255, 255, 0.95); --success: #27ae60; --gold: #f1c40f; }
+        :root { --primary: #e67e22; --secondary: #2c3e50; --card: rgba(255, 255, 255, 0.95); --success: #27ae60; --gold: #f1c40f; --video: #2980b9; }
         body { 
             font-family: -apple-system, system-ui, sans-serif; 
             margin: 0; padding: 10px; min-height: 100vh;
@@ -16,7 +16,6 @@
         .header { text-align: center; padding: 15px 0; background: rgba(44, 62, 80, 0.85); color: white; border-radius: 12px; margin-bottom: 15px; }
         .container { max-width: 500px; margin: auto; }
         
-        /* Dag-velger */
         .day-selector { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
         .btn-day { 
             width: 70px; height: 70px; border: none; background: none; cursor: pointer; transition: all 0.2s ease; padding: 0;
@@ -27,7 +26,6 @@
         .btn-day.active svg { fill: var(--primary); transform: scale(1.1); }
         .btn-day.active { color: white; }
 
-        /* Smiley Velger */
         .mood-box { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .mood-options { display: flex; justify-content: space-around; margin-top: 10px; }
         .mood-btn { font-size: 2em; cursor: pointer; border: 2px solid transparent; border-radius: 10px; padding: 5px; transition: 0.2s; background: none; }
@@ -36,14 +34,21 @@
         .card { background: var(--card); border-radius: 15px; padding: 18px; margin-bottom: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border-left: 6px solid var(--primary); position: relative; }
         .ex-title { font-weight: bold; color: var(--secondary); font-size: 1.15em; display: block; margin-bottom: 5px; }
         
-        /* Pers-merke */
         .pers-badge { position: absolute; top: 10px; right: 10px; color: var(--gold); font-weight: bold; font-size: 0.8em; display: none; align-items: center; gap: 4px; animation: bounce 0.5s ease; }
         @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }
 
-        /* Sett-prikker */
         .set-tracker { display: flex; gap: 10px; margin: 10px 0; align-items: center; }
         .set-dot { width: 25px; height: 25px; border: 2px solid #bdc3c7; border-radius: 50%; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: #bdc3c7; font-weight: bold; }
         .set-dot.done { background: var(--success); border-color: var(--success); color: white; }
+
+        .ex-desc { font-size: 0.9em; color: #666; margin-bottom: 10px; }
+        
+        /* Video-knapp stil */
+        .video-btn { 
+            display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; padding: 6px 12px;
+            background: var(--video); color: white; text-decoration: none; border-radius: 6px;
+            font-size: 0.8em; font-weight: bold;
+        }
 
         .input-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
         input { flex: 1; padding: 12px; border: 2px solid #eee; border-radius: 8px; font-size: 16px; outline: none; }
@@ -61,7 +66,6 @@
         .history-area { margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 8px; display: none; border: 1px solid #eee; }
         .chart-div { width: 100%; height: 150px; margin-bottom: 10px; }
         .history-item { font-size: 0.85em; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 6px 0; }
-        .video-link { color: var(--primary); font-weight: bold; text-decoration: none; border-bottom: 1px dashed var(--primary); }
     </style>
 </head>
 <body>
@@ -105,35 +109,34 @@ google.charts.load('current', {'packages':['corechart']});
 let activeTimers = {};
 let currentMood = "";
 
+/* Legg til lenke i 'v'-feltet for å vise video-knapp */
 const program = {
     "1": [
-        { id: "m1", t: "Pust & Kontroll", i: "3x10", d: "Pust ut på vei opp.", timer: false },
-        { id: "m2", t: "Sittende Roing", i: "3x10-12", d: "Godt grep.", timer: true },
-        { id: "m3", t: "Gående utfall", i: "3x10 per bein", d: "Hold manualer.", timer: true },
-        { id: "m4", t: "Benkpress m/stopp", i: "3x8", d: "1 sek stopp på brystet.", timer: true },
-        { id: "m5", t: "Liggende lårcurl", i: "3x10-12", d: "Bakside lår.", timer: false }
+        { id: "m1", t: "Pust & Kontroll", i: "3x10", d: "Pust ut på vei opp.", timer: false, v: "" },
+        { id: "m2", t: "Sittende Roing", i: "3x10-12", d: "Godt grep.", timer: true, v: "" },
+        { id: "m3", t: "Gående utfall", i: "3x10 per bein", d: "Hold manualer.", timer: true, v: "" },
+        { id: "m4", t: "Benkpress m/stopp", i: "3x8", d: "1 sek stopp på brystet.", timer: true, v: "" },
+        { id: "m5", t: "Liggende lårcurl", i: "3x10-12", d: "Bakside lår.", timer: false, v: "https://www.youtube.com/watch?v=FovXvLshOIs" }
     ],
     "2": [
-        { id: "o1", t: "Dead bugs", i: "3x10", d: "Kjernefokus.", timer: false },
-        { id: "o2", t: "Nedtrekk (bredt)", i: "3x10", d: "Trekk mot bryst.", timer: true },
-        { id: "o3", t: "Leg Extension", i: "3x12", d: "Fremside lår.", timer: false },
-        { id: "o4", t: "Skråbenk m/manualer", i: "3x10", d: "Kontrollert.", timer: true },
-        { id: "o5", t: "Facepulls", i: "3x15", d: "Holdning.", timer: false }
+        { id: "o1", t: "Dead bugs", i: "3x10", d: "Kjernefokus.", timer: false, v: "" },
+        { id: "o2", t: "Nedtrekk (bredt)", i: "3x10", d: "Trekk mot bryst.", timer: true, v: "" },
+        { id: "o3", t: "Leg Extension", i: "3x12", d: "Fremside lår.", timer: false, v: "" },
+        { id: "o4", t: "Skråbenk m/manualer", i: "3x10", d: "Kontrollert.", timer: true, v: "" },
+        { id: "o5", t: "Facepulls", i: "3x15", d: "Holdning.", timer: false, v: "" }
     ],
     "3": [
-        { id: "f1", t: "Planke på knær/tær", i: "3x30 sek", d: "Hold spennet.", timer: false },
-        { id: "f2", t: "Hip Thrust (Maskin)", i: "3x12", d: "Skvis rumpa!", timer: true },
-        { id: "f3", t: "Bulgarsk utfall", i: "3x8 per bein", d: "Tungt for beina.", timer: true },
-        { id: "f4", t: "Smal benkpress", i: "3x10", d: "Triceps.", timer: true },
-        { id: "f5", t: "Sittende lårcurl", i: "3x12", d: "Bakside lår.", timer: false }
+        { id: "f1", t: "Planke på knær/tær", i: "3x30 sek", d: "Hold spennet.", timer: false, v: "" },
+        { id: "f2", t: "Hip Thrust (Maskin)", i: "3x12", d: "Skvis rumpa!", timer: true, v: "https://www.youtube.com/shorts/0xfdeCBwoYw" },
+        { id: "f3", t: "Bulgarsk utfall", i: "3x8 per bein", d: "Tungt for beina.", timer: true, v: "https://www.youtube.com/watch?v=agbrf5fckgY" },
+        { id: "f4", t: "Smal benkpress", i: "3x10", d: "Triceps.", timer: true, v: "" },
+        { id: "f5", t: "Sittende lårcurl", i: "3x12", d: "Bakside lår.", timer: false, v: "https://www.youtube.com/watch?v=tx9Ygh4OFSc&t=8s" }
     ]
 };
 
 function setMood(emoji) {
     currentMood = emoji;
-    document.querySelectorAll('.mood-btn').forEach(b => {
-        b.classList.toggle('active', b.innerText === emoji);
-    });
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('active', b.innerText === emoji));
 }
 
 function toggleSet(btn) {
@@ -150,14 +153,16 @@ function updateView(day) {
         const hist = JSON.parse(localStorage.getItem('nsf_v4_' + ex.id)) || [];
         const lastWeight = hist.length > 0 ? hist[0].weight : "";
         const lastDate = hist.length > 0 ? hist[0].date : "Ingen logg";
-        const moodHint = hist.length > 0 && hist[0].mood ? hist[0].mood : "";
 
         return `
         <div class="card" id="card-${ex.id}">
             <div id="pers-${ex.id}" class="pers-badge">🌟 NY PERS!</div>
             <span class="ex-title">${ex.t}</span>
-            <div class="ex-info">${ex.i} ${moodHint}</div>
-            <div class="ex-desc">${ex.d}</div>
+            <div class="ex-info">${ex.i}</div>
+            <div class="ex-desc">
+                ${ex.d}
+                ${ex.v ? `<br><a href="${ex.v}" target="_blank" class="video-btn">Se video 🎥</a>` : ''}
+            </div>
             
             <div class="set-tracker">
                 <span style="font-size: 0.8em; color: #666;">Sett:</span>
@@ -190,9 +195,8 @@ function save(id, day) {
     const date = new Date().toLocaleDateString('no-NO', {day:'2-digit', month:'2-digit'});
     
     let history = JSON.parse(localStorage.getItem('nsf_v4_' + id)) || [];
-    
-    // Sjekk for PERS
     const oldMax = history.length > 0 ? Math.max(...history.map(h => h.weight)) : 0;
+    
     if (weightVal > oldMax && history.length > 0) {
         document.getElementById('pers-' + id).style.display = 'flex';
     }
@@ -200,7 +204,7 @@ function save(id, day) {
     history.unshift({ weight: weightVal, date: date, mood: currentMood });
     localStorage.setItem('nsf_v4_' + id, JSON.stringify(history.slice(0,10)));
     
-    setTimeout(() => updateView(day), 1500); // Litt pause så hun ser pers-stjerna
+    setTimeout(() => updateView(day), 1500);
 }
 
 function startTimer(id) {
