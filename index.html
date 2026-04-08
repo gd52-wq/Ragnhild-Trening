@@ -42,52 +42,30 @@
         .set-dot.done { background: var(--success); border-color: var(--success); color: white; }
 
         .ex-desc { font-size: 0.9em; color: #666; margin-bottom: 10px; }
-        
-        /* Video-knapp stil */
-        .video-btn { 
-            display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; padding: 6px 12px;
-            background: var(--video); color: white; text-decoration: none; border-radius: 6px;
-            font-size: 0.8em; font-weight: bold;
-        }
+        .video-btn { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; padding: 6px 12px; background: var(--video); color: white; text-decoration: none; border-radius: 6px; font-size: 0.8em; font-weight: bold; }
 
         .input-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
         input { flex: 1; padding: 12px; border: 2px solid #eee; border-radius: 8px; font-size: 16px; outline: none; }
         .btn-save { padding: 12px 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .btn-timer { padding: 12px 10px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-size: 0.8em; font-weight: bold; cursor: pointer; min-width: 85px; }
-        .btn-timer.running { background: #7f8c8d; }
-        .btn-timer.finished { background: var(--success); animation: pulse 1s infinite; }
-
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-
+        
         .footer-btns { display: flex; align-items: center; gap: 10px; margin-top: 12px; border-top: 1px solid #eee; padding-top: 10px; }
         .btn-small { background: #bdc3c7; font-size: 0.8em; padding: 6px 12px; border: none; color: white; border-radius: 6px; cursor: pointer; }
         .last-date { font-size: 0.8em; color: #95a5a6; font-weight: bold; }
         
         .history-area { margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 8px; display: none; border: 1px solid #eee; }
         .chart-div { width: 100%; height: 150px; margin-bottom: 10px; }
-        .history-item { font-size: 0.85em; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 6px 0; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">
-        <h2 style="margin:0">Ragnhild Supersterk Pro</h2>
-    </div>
+    <div class="header"><h2 style="margin:0">Ragnhild Supersterk Pro</h2></div>
 
     <div class="day-selector">
-        <button id="btn-1" class="btn-day" onclick="updateView('1')">
-            <svg viewBox="0 0 512 512"><circle cx="256" cy="350" r="110" /><circle cx="120" cy="220" r="45" /><circle cx="210" cy="150" r="50" /><circle cx="305" cy="150" r="50" /><circle cx="395" cy="220" r="45" /></svg>
-            <span>1</span>
-        </button>
-        <button id="btn-2" class="btn-day" onclick="updateView('2')">
-            <svg viewBox="0 0 512 512"><circle cx="256" cy="350" r="110" /><circle cx="120" cy="220" r="45" /><circle cx="210" cy="150" r="50" /><circle cx="305" cy="150" r="50" /><circle cx="395" cy="220" r="45" /></svg>
-            <span>2</span>
-        </button>
-        <button id="btn-3" class="btn-day" onclick="updateView('3')">
-            <svg viewBox="0 0 512 512"><circle cx="256" cy="350" r="110" /><circle cx="120" cy="220" r="45" /><circle cx="210" cy="150" r="50" /><circle cx="305" cy="150" r="50" /><circle cx="395" cy="220" r="45" /></svg>
-            <span>3</span>
-        </button>
+        <button id="btn-1" class="btn-day" onclick="updateView('1')"><svg viewBox="0 0 512 512"><circle cx="256" cy="350" r="110" /><circle cx="120" cy="220" r="45" /><circle cx="210" cy="150" r="50" /><circle cx="305" cy="150" r="50" /><circle cx="395" cy="220" r="45" /></svg><span>1</span></button>
+        <button id="btn-2" class="btn-day" onclick="updateView('2')"><svg viewBox="0 0 512 512"><circle cx="256" cy="350" r="110" /><circle cx="120" cy="220" r="45" /><circle cx="210" cy="150" r="50" /><circle cx="305" cy="150" r="50" /><circle cx="395" cy="220" r="45" /></svg><span>2</span></button>
+        <button id="btn-3" class="btn-day" onclick="updateView('3')"><svg viewBox="0 0 512 512"><circle cx="256" cy="350" r="110" /><circle cx="120" cy="220" r="45" /><circle cx="210" cy="150" r="50" /><circle cx="305" cy="150" r="50" /><circle cx="395" cy="220" r="45" /></svg><span>3</span></button>
     </div>
 
     <div class="mood-box">
@@ -109,38 +87,40 @@ google.charts.load('current', {'packages':['corechart']});
 let activeTimers = {};
 let currentMood = "";
 
-/* Legg til lenke i 'v'-feltet for å vise video-knapp */
 const program = {
     "1": [
         { id: "m1", t: "Pust & Kontroll", i: "3x10", d: "Pust ut på vei opp.", timer: false, v: "" },
         { id: "m2", t: "Sittende Roing", i: "3x10-12", d: "Godt grep.", timer: true, v: "" },
         { id: "m3", t: "Gående utfall", i: "3x10 per bein", d: "Hold manualer.", timer: true, v: "" },
-        { id: "m4", t: "Benkpress m/stopp", i: "3x8", d: "1 sek stopp på brystet.", timer: true, v: "" },
+        { id: "m4", t: "Benkpress m/stopp", i: "1x8, 2x6, 2x5, 2x4", d: "Husk stopp på hver rep.", timer: true, v: "" },
         { id: "m5", t: "Liggende lårcurl", i: "3x10-12", d: "Bakside lår.", timer: false, v: "https://www.youtube.com/watch?v=FovXvLshOIs" }
     ],
     "2": [
-        { id: "o1", t: "Dead bugs", i: "3x10", d: "Kjernefokus.", timer: false, v: "" },
+        { id: "o1", t: "Pallof Press (Kabel)", i: "3x10", d: "Stå sidelengs, press håndtaket rett frem. Motstå rotasjon. Pust ut på press..", timer: false, v: "https://www.youtube.com/shorts/qOnAC5hz0Vg" },
         { id: "o2", t: "Nedtrekk (bredt)", i: "3x10", d: "Trekk mot bryst.", timer: true, v: "" },
-        { id: "o3", t: "Leg Extension", i: "3x12", d: "Fremside lår.", timer: false, v: "" },
-        { id: "o4", t: "Skråbenk m/manualer", i: "3x10", d: "Kontrollert.", timer: true, v: "" },
+        { id: "o3", t: "Leg Extension/lårcurl", i: "3x12", d: "Fremside lår.", timer: false, v: "" },
+        { id: "o4", t: "Skråbenk m/manualer eller stativ", i: "3x10", d: "Kontrollert.", timer: true, v: "" },
         { id: "o5", t: "Facepulls", i: "3x15", d: "Holdning.", timer: false, v: "" }
     ],
     "3": [
         { id: "f1", t: "Planke på knær/tær", i: "3x30 sek", d: "Hold spennet.", timer: false, v: "" },
         { id: "f2", t: "Hip Thrust (Maskin)", i: "3x12", d: "Skvis rumpa!", timer: true, v: "https://www.youtube.com/shorts/0xfdeCBwoYw" },
         { id: "f3", t: "Bulgarsk utfall", i: "3x8 per bein", d: "Tungt for beina.", timer: true, v: "https://www.youtube.com/watch?v=agbrf5fckgY" },
-        { id: "f4", t: "Smal benkpress", i: "3x10", d: "Triceps.", timer: true, v: "" },
-        { id: "f5", t: "Sittende lårcurl", i: "3x12", d: "Bakside lår.", timer: false, v: "https://www.youtube.com/watch?v=tx9Ygh4OFSc&t=8s" }
+        { id: "f4", t: "Benkpress m/stopp", i: "2x6, 2x5, 2x3", d: "1 sek markert stopp på brystet.", timer: true, v: "" },
+        { id: "f5", t: "Sittende lårcurl", i: "3x12", d: "Bakside lår.", timer: false, v: "" }
     ]
 };
+
+// NY FUNKSJON: Lagrer avsjekk i minnet
+function toggleSet(exId, setNum, element) {
+    element.classList.toggle('done');
+    const isDone = element.classList.contains('done');
+    localStorage.setItem(`set_${exId}_${setNum}`, isDone);
+}
 
 function setMood(emoji) {
     currentMood = emoji;
     document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('active', b.innerText === emoji));
-}
-
-function toggleSet(btn) {
-    btn.classList.toggle('done');
 }
 
 function updateView(day) {
@@ -154,6 +134,11 @@ function updateView(day) {
         const lastWeight = hist.length > 0 ? hist[0].weight : "";
         const lastDate = hist.length > 0 ? hist[0].date : "Ingen logg";
 
+        // Sjekker om sett var huket av fra før
+        const s1 = localStorage.getItem(`set_${ex.id}_1`) === 'true' ? 'done' : '';
+        const s2 = localStorage.getItem(`set_${ex.id}_2`) === 'true' ? 'done' : '';
+        const s3 = localStorage.getItem(`set_${ex.id}_3`) === 'true' ? 'done' : '';
+
         return `
         <div class="card" id="card-${ex.id}">
             <div id="pers-${ex.id}" class="pers-badge">🌟 NY PERS!</div>
@@ -166,9 +151,9 @@ function updateView(day) {
             
             <div class="set-tracker">
                 <span style="font-size: 0.8em; color: #666;">Sett:</span>
-                <div class="set-dot" onclick="toggleSet(this)">1</div>
-                <div class="set-dot" onclick="toggleSet(this)">2</div>
-                <div class="set-dot" onclick="toggleSet(this)">3</div>
+                <div class="set-dot ${s1}" onclick="toggleSet('${ex.id}', 1, this)">1</div>
+                <div class="set-dot ${s2}" onclick="toggleSet('${ex.id}', 2, this)">2</div>
+                <div class="set-dot ${s3}" onclick="toggleSet('${ex.id}', 3, this)">3</div>
             </div>
 
             <div class="input-row">
@@ -204,7 +189,7 @@ function save(id, day) {
     history.unshift({ weight: weightVal, date: date, mood: currentMood });
     localStorage.setItem('nsf_v4_' + id, JSON.stringify(history.slice(0,10)));
     
-    setTimeout(() => updateView(day), 1500);
+    updateView(day);
 }
 
 function startTimer(id) {
