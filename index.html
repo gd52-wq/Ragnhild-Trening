@@ -3,69 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ragnhild Supersterk Pro</title>
+    <title>Ragnhild Supersterk Pro 💪</title>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
-        :root { --primary: #e67e22; --secondary: #2c3e50; --card: rgba(255, 255, 255, 0.95); --success: #27ae60; --gold: #f1c40f; --video: #2980b9; }
+        :root { 
+            --primary: #e67e22; 
+            --secondary: #2c3e50; 
+            --card: rgba(255, 255, 255, 0.95);
+            --card-solid: #ffffff;
+            --success: #27ae60;
+            --gold: #f1c40f;
+            --video: #2980b9;
+            --text: #333;
+            --text-muted: #666;
+            --text-info: #444;
+            --border: #eee;
+            --dot-border: #bdc3c7;
+            --dot-bg: white;
+            --dot-text: #7f8c8d;
+            --history-bg: #f9f9f9;
+            --history-border: #ddd;
+            --dur-bg: #ecf0f1;
+            --week-bg: rgba(255,255,255,0.93);
+            --note-bg: #f7f9fc;
+            --note-border: #d0d7e2;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --card: rgba(30, 36, 48, 0.97);
+                --card-solid: #1e2430;
+                --text: #e8eaf0;
+                --text-muted: #a0a8b8;
+                --text-info: #c0c8d8;
+                --border: #2e3848;
+                --dot-border: #4a5568;
+                --dot-bg: #252d3d;
+                --dot-text: #8899aa;
+                --history-bg: #1a2030;
+                --history-border: #2e3848;
+                --dur-bg: #252d3d;
+                --week-bg: rgba(20, 26, 38, 0.97);
+                --note-bg: #1a2030;
+                --note-border: #2e3848;
+            }
+        }
+        
         body { 
             font-family: -apple-system, system-ui, sans-serif; 
             margin: 0; padding: 10px; min-height: 100vh;
             background: url('bedlington.jpg') no-repeat center center fixed; 
             background-size: cover;
+            color: var(--text);
         }
-        .header { text-align: center; padding: 15px 0; background: rgba(44, 62, 80, 0.85); color: white; border-radius: 12px; margin-bottom: 15px; }
+
+        .header { 
+            text-align: center; padding: 15px 0; background: rgba(44, 62, 80, 0.88); 
+            color: white; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
         .container { max-width: 500px; margin: auto; }
-        
-        .day-selector { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
-        .btn-day { 
-            width: 70px; height: 70px; border: none; background: none; cursor: pointer; transition: all 0.2s ease; padding: 0;
-            position: relative; color: #7f8c8d; font-weight: 900; font-size: 1.4em;
+
+        /* === UKEOVERSIKT === */
+        .week-box {
+            background: var(--week-bg); border-radius: 12px; margin-bottom: 15px;
+            padding: 12px 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border-left: 6px solid var(--secondary);
         }
-        .btn-day svg { width: 100%; height: 100%; fill: #ffffff; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); transition: 0.3s; }
-        .btn-day span { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%); z-index: 10; }
-        .btn-day.active svg { fill: var(--primary); transform: scale(1.1); }
-        .btn-day.active { color: white; }
+        .week-title { font-weight: bold; color: var(--secondary); font-size: 0.85em; margin-bottom: 10px; letter-spacing: 0.03em; }
+        .week-stats { display: flex; gap: 8px; }
+        .week-stat { flex: 1; background: var(--history-bg); border-radius: 8px; padding: 8px; text-align: center; border: 1px solid var(--history-border); }
+        .week-stat-val { font-size: 1.5em; font-weight: bold; color: var(--primary); line-height: 1; }
+        .week-stat-lbl { font-size: 0.7em; color: var(--text-muted); margin-top: 3px; }
+        .week-stat-diff { font-size: 0.7em; margin-top: 2px; font-weight: bold; }
+        .diff-up { color: var(--success); }
+        .diff-down { color: var(--primary); }
+        .diff-same { color: var(--text-muted); }
 
         .mood-box { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .mood-options { display: flex; justify-content: space-around; margin-top: 10px; }
         .mood-btn { font-size: 2em; cursor: pointer; border: 2px solid transparent; border-radius: 10px; padding: 5px; transition: 0.2s; background: none; }
         .mood-btn.active { border-color: var(--primary); background: rgba(230, 126, 34, 0.1); transform: scale(1.2); }
 
-        .card { background: var(--card); border-radius: 15px; padding: 18px; margin-bottom: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border-left: 6px solid var(--primary); position: relative; }
+        /* Day selector with SVG paw + sub-label */
+        .day-selector { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
+        .btn-day { 
+            width: 82px; height: 82px; border: none; background: none; cursor: pointer;
+            transition: all 0.2s ease; padding: 0; position: relative;
+            color: var(--dot-text); font-weight: 900; font-size: 1.4em;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .btn-day svg { position: absolute; top: 0; left: 0; width: 100%; height: 70%; fill: var(--card-solid); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); transition: 0.3s; }
+        .btn-day .btn-num { position: absolute; top: 16%; left: 50%; transform: translateX(-50%); z-index: 10; font-size: 1em; line-height: 1; }
+        .btn-day .btn-day-sub { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); font-size: 0.32em; font-weight: normal; color: var(--text-muted); white-space: nowrap; }
+        .btn-day.active svg { fill: var(--primary); transform: scale(1.1); }
+        .btn-day.active { color: white; }
+        .btn-day.active .btn-day-sub { color: var(--primary); font-weight: bold; }
+
+        .card { 
+            background: var(--card); border-radius: 15px; padding: 18px; margin-bottom: 15px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15); border-left: 6px solid var(--primary); position: relative;
+        }
         .ex-title { font-weight: bold; color: var(--secondary); font-size: 1.15em; display: block; margin-bottom: 5px; }
+        .ex-info { font-size: 0.9em; color: var(--text-info); margin-bottom: 5px; font-weight: 600; }
         
         .pers-badge { position: absolute; top: 10px; right: 10px; color: var(--gold); font-weight: bold; font-size: 0.8em; display: none; align-items: center; gap: 4px; animation: bounce 0.5s ease; }
         @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }
 
-        .set-tracker { display: flex; gap: 10px; margin: 10px 0; align-items: center; }
-        .set-dot { width: 25px; height: 25px; border: 2px solid #bdc3c7; border-radius: 50%; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.7em; color: #bdc3c7; font-weight: bold; }
-        .set-dot.done { background: var(--success); border-color: var(--success); color: white; }
+        .set-tracker { display: flex; gap: 10px; margin: 10px 0; align-items: center; flex-wrap: wrap; }
+        .set-dot { 
+            width: 28px; height: 28px; border: 2px solid var(--dot-border); border-radius: 50%; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center; 
+            font-size: 0.8em; color: var(--dot-text); font-weight: bold; background: var(--dot-bg);
+            transition: 0.2s;
+        }
+        .set-dot.done { background: var(--success); border-color: var(--success); color: white; transform: scale(1.1); }
 
-        .ex-desc { font-size: 0.9em; color: #666; margin-bottom: 10px; }
+        .ex-desc { font-size: 0.9em; color: var(--text-muted); margin-bottom: 10px; }
         .video-btn { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; padding: 6px 12px; background: var(--video); color: white; text-decoration: none; border-radius: 6px; font-size: 0.8em; font-weight: bold; }
 
         .input-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
-        input { flex: 1; padding: 12px; border: 2px solid #eee; border-radius: 8px; font-size: 16px; outline: none; }
+        input[type=number] { flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 16px; outline: none; background: var(--dot-bg); color: var(--text); }
         .btn-save { padding: 12px 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .btn-timer { padding: 12px 10px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-size: 0.8em; font-weight: bold; cursor: pointer; min-width: 85px; }
+
+        .timer-wrap { display: flex; flex-direction: column; gap: 4px; }
+        .timer-durations { display: flex; gap: 4px; }
+        .btn-dur { padding: 4px 7px; background: var(--dur-bg); color: var(--secondary); border: none; border-radius: 5px; font-size: 0.7em; font-weight: bold; cursor: pointer; transition: 0.15s; }
+        .btn-dur.selected { background: var(--secondary); color: white; }
+        .btn-timer { padding: 8px 10px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-size: 0.8em; font-weight: bold; cursor: pointer; min-width: 85px; }
+        .btn-timer.running { background: #7f8c8d; }
+        .btn-timer.finished { background: var(--success); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        .btn-reset-day { 
+            background: #7f8c8d; color: white; border: none; padding: 15px; 
+            border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; 
+            margin: 20px 0 40px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .footer-btns { display: flex; align-items: center; gap: 10px; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
+        .btn-small { background: #95a5a6; font-size: 0.8em; padding: 6px 12px; border: none; color: white; border-radius: 6px; cursor: pointer; }
+        .last-date { font-size: 0.8em; color: var(--dot-text); font-weight: bold; }
         
-        .footer-btns { display: flex; align-items: center; gap: 10px; margin-top: 12px; border-top: 1px solid #eee; padding-top: 10px; }
-        .btn-small { background: #bdc3c7; font-size: 0.8em; padding: 6px 12px; border: none; color: white; border-radius: 6px; cursor: pointer; }
-        .last-date { font-size: 0.8em; color: #95a5a6; font-weight: bold; }
-        
-        .history-area { margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 8px; display: none; border: 1px solid #eee; }
+        .history-area { margin-top: 10px; padding: 10px; background: var(--history-bg); border-radius: 8px; display: none; border: 1px solid var(--history-border); }
         .chart-div { width: 100%; height: 150px; margin-bottom: 10px; }
+        .history-item { font-size: 0.8em; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding: 5px 0; color: var(--text); }
+
+        /* === NOTATER === */
+        .note-box {
+            background: var(--card); border-radius: 12px; margin-bottom: 15px;
+            padding: 12px 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .note-label { font-weight: bold; color: var(--secondary); font-size: 0.85em; margin-bottom: 8px; display: block; }
+        .note-input {
+            width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px;
+            border: 1.5px solid var(--note-border); background: var(--note-bg);
+            font-size: 0.9em; color: var(--text); font-family: inherit; resize: none;
+            outline: none; line-height: 1.5;
+        }
+        .note-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+        .note-saved { font-size: 0.72em; color: var(--text-muted); }
+        .btn-note-save { font-size: 0.75em; padding: 5px 12px; background: var(--secondary); color: white; border: none; border-radius: 6px; cursor: pointer; }
+
+        .status-msg {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #27ae60; color: white; padding: 10px 20px; border-radius: 20px; display: none; z-index: 1000;
+        }
     </style>
 </head>
 <body>
 
+<div id="status" class="status-msg">🚀 Lagret!</div>
+
 <div class="container">
-    <div class="header"><h2 style="margin:0">Ragnhild Supersterk Pro</h2></div>
+    <div class="header">
+        <h2 style="margin:0">Ragnhild Supersterk Pro 💪</h2>
+    </div>
+
+    <div id="week-box" class="week-box"></div>
 
     <div class="day-selector">
-        <button id="btn-1" class="btn-day" onclick="updateView('1')"><svg viewBox="0 0 512 512"><circle cx="256" cy="350" r="110" /><circle cx="120" cy="220" r="45" /><circle cx="210" cy="150" r="50" /><circle cx="305" cy="150" r="50" /><circle cx="395" cy="220" r="45" /></svg><span>1</span></button>
-        <button id="btn-2" class="btn-day" onclick="updateView('2')"><svg viewBox="0 0 512 512"><circle cx="256" cy="350" r="110" /><circle cx="120" cy="220" r="45" /><circle cx="210" cy="150" r="50" /><circle cx="305" cy="150" r="50" /><circle cx="395" cy="220" r="45" /></svg><span>2</span></button>
-        <button id="btn-3" class="btn-day" onclick="updateView('3')"><svg viewBox="0 0 512 512"><circle cx="256" cy="350" r="110" /><circle cx="120" cy="220" r="45" /><circle cx="210" cy="150" r="50" /><circle cx="305" cy="150" r="50" /><circle cx="395" cy="220" r="45" /></svg><span>3</span></button>
+        <button id="btn-1" class="btn-day" onclick="updateView('1')">
+            <svg viewBox="0 0 512 512"><circle cx="256" cy="350" r="110"/><circle cx="120" cy="220" r="45"/><circle cx="210" cy="150" r="50"/><circle cx="305" cy="150" r="50"/><circle cx="395" cy="220" r="45"/></svg>
+            <span class="btn-num">1</span><span class="btn-day-sub">Bein & Rygg</span>
+        </button>
+        <button id="btn-2" class="btn-day" onclick="updateView('2')">
+            <svg viewBox="0 0 512 512"><circle cx="256" cy="350" r="110"/><circle cx="120" cy="220" r="45"/><circle cx="210" cy="150" r="50"/><circle cx="305" cy="150" r="50"/><circle cx="395" cy="220" r="45"/></svg>
+            <span class="btn-num">2</span><span class="btn-day-sub">Overkropp</span>
+        </button>
+        <button id="btn-3" class="btn-day" onclick="updateView('3')">
+            <svg viewBox="0 0 512 512"><circle cx="256" cy="350" r="110"/><circle cx="120" cy="220" r="45"/><circle cx="210" cy="150" r="50"/><circle cx="305" cy="150" r="50"/><circle cx="395" cy="220" r="45"/></svg>
+            <span class="btn-num">3</span><span class="btn-day-sub">Fullkropp</span>
+        </button>
     </div>
 
     <div class="mood-box">
@@ -78,6 +207,7 @@
         </div>
     </div>
 
+    <div id="note-area"></div>
     <div id="workoutContent"></div>
 </div>
 
@@ -86,6 +216,7 @@ google.charts.load('current', {'packages':['corechart']});
 
 let activeTimers = {};
 let currentMood = "";
+const timerDurations = {};
 
 const program = {
     "1": [
@@ -96,9 +227,9 @@ const program = {
         { id: "m5", t: "Liggende lårcurl", i: "3x10-12", d: "Bakside lår.", timer: false, v: "https://www.youtube.com/watch?v=FovXvLshOIs" }
     ],
     "2": [
-        { id: "o1", t: "Pallof Press (Kabel)", i: "3x10", d: "Stå sidelengs, press håndtaket rett frem. Motstå rotasjon. Pust ut på press..", timer: false, v: "https://www.youtube.com/shorts/qOnAC5hz0Vg" },
+        { id: "o1", t: "Pallof Press (Kabel)", i: "3x10", d: "Stå sidelengs, press håndtaket rett frem. Motstå rotasjon. Pust ut på press.", timer: false, v: "https://www.youtube.com/shorts/qOnAC5hz0Vg" },
         { id: "o2", t: "Nedtrekk (bredt)", i: "3x10", d: "Trekk mot bryst.", timer: true, v: "" },
-        { id: "o3", t: "Leg Extension/lårcurl", i: "3x12", d: "Fremside lår.", timer: false, v: "" },
+        { id: "o3", t: "Leg Extension / Lårcurl", i: "3x12", d: "Fremside lår.", timer: false, v: "" },
         { id: "o4", t: "Skråbenk m/manualer eller stativ", i: "3x10", d: "Kontrollert.", timer: true, v: "" },
         { id: "o5", t: "Facepulls", i: "3x15", d: "Holdning.", timer: false, v: "" }
     ],
@@ -111,11 +242,18 @@ const program = {
     ]
 };
 
-// NY FUNKSJON: Lagrer avsjekk i minnet
+function getSetCount(infoString) {
+    let totalSets = 0;
+    infoString.split(',').forEach(part => {
+        const match = part.match(/(\d+)x/);
+        if (match) totalSets += parseInt(match[1]);
+    });
+    return totalSets || 3;
+}
+
 function toggleSet(exId, setNum, element) {
     element.classList.toggle('done');
-    const isDone = element.classList.contains('done');
-    localStorage.setItem(`set_${exId}_${setNum}`, isDone);
+    localStorage.setItem(`ragnhild_set_${exId}_${setNum}`, element.classList.contains('done'));
 }
 
 function setMood(emoji) {
@@ -124,20 +262,22 @@ function setMood(emoji) {
 }
 
 function updateView(day) {
-    localStorage.setItem('nsf_last_day', day);
+    localStorage.setItem('ragnhild_last_day', day);
     document.querySelectorAll('.btn-day').forEach(b => b.classList.remove('active'));
     document.getElementById('btn-' + day).classList.add('active');
 
     const container = document.getElementById('workoutContent');
-    container.innerHTML = program[day].map(ex => {
-        const hist = JSON.parse(localStorage.getItem('nsf_v4_' + ex.id)) || [];
+    let html = program[day].map(ex => {
+        const hist = JSON.parse(localStorage.getItem('ragnhild_' + ex.id)) || [];
         const lastWeight = hist.length > 0 ? hist[0].weight : "";
         const lastDate = hist.length > 0 ? hist[0].date : "Ingen logg";
 
-        // Sjekker om sett var huket av fra før
-        const s1 = localStorage.getItem(`set_${ex.id}_1`) === 'true' ? 'done' : '';
-        const s2 = localStorage.getItem(`set_${ex.id}_2`) === 'true' ? 'done' : '';
-        const s3 = localStorage.getItem(`set_${ex.id}_3`) === 'true' ? 'done' : '';
+        const numSets = getSetCount(ex.i);
+        let setDotsHtml = '';
+        for(let i = 1; i <= numSets; i++) {
+            const isDone = localStorage.getItem(`ragnhild_set_${ex.id}_${i}`) === 'true' ? 'done' : '';
+            setDotsHtml += `<div class="set-dot ${isDone}" onclick="toggleSet('${ex.id}', ${i}, this)">${i}</div>`;
+        }
 
         return `
         <div class="card" id="card-${ex.id}">
@@ -148,76 +288,219 @@ function updateView(day) {
                 ${ex.d}
                 ${ex.v ? `<br><a href="${ex.v}" target="_blank" class="video-btn">Se video 🎥</a>` : ''}
             </div>
-            
-            <div class="set-tracker">
-                <span style="font-size: 0.8em; color: #666;">Sett:</span>
-                <div class="set-dot ${s1}" onclick="toggleSet('${ex.id}', 1, this)">1</div>
-                <div class="set-dot ${s2}" onclick="toggleSet('${ex.id}', 2, this)">2</div>
-                <div class="set-dot ${s3}" onclick="toggleSet('${ex.id}', 3, this)">3</div>
-            </div>
-
+            <div class="set-tracker">${setDotsHtml}</div>
             <div class="input-row">
-                <input type="number" id="in-${ex.id}" placeholder="Sist: ${lastWeight} kg" inputmode="decimal">
+                <input type="number" id="in-${ex.id}" placeholder="Sist: ${lastWeight} kg" inputmode="decimal" value="${lastWeight}">
                 <button class="btn-save" onclick="save('${ex.id}', '${day}')">Lagre</button>
-                ${ex.timer ? `<button id="timer-${ex.id}" class="btn-timer" onclick="startTimer('${ex.id}')">Pause 2m</button>` : ''}
+                ${ex.timer ? `
+                <div class="timer-wrap">
+                    <div class="timer-durations">
+                        <button class="btn-dur" onclick="setDur('${ex.id}',90,this)">90s</button>
+                        <button class="btn-dur selected" onclick="setDur('${ex.id}',120,this)">2m</button>
+                        <button class="btn-dur" onclick="setDur('${ex.id}',180,this)">3m</button>
+                    </div>
+                    <button id="timer-${ex.id}" class="btn-timer" onclick="startTimer('${ex.id}')">Start pause</button>
+                </div>` : ''}
             </div>
             <div class="footer-btns">
                 <button class="btn-small" onclick="toggleHistory('${ex.id}', '${ex.t}')">Logg & Graf</button>
-                <span class="last-date">${lastDate}</span>
+                <span class="last-date" id="date-${ex.id}">${lastDate}</span>
             </div>
             <div class="history-area" id="hist-area-${ex.id}">
                 <div id="chart-${ex.id}" class="chart-div"></div>
                 <div id="hist-list-${ex.id}"></div>
             </div>
         </div>
-    `}).join('');
+        \`;
+    }).join('');
+
+    html += `<button class="btn-reset-day" onclick="resetAllSets('${day}')">🔄 Nullstill alle sett (ny uke)</button>`;
+    container.innerHTML = html;
+    renderNoteArea(day);
+    renderWeekBox();
 }
 
 function save(id, day) {
     const val = document.getElementById('in-' + id).value;
     if(!val) return;
     const weightVal = parseFloat(val);
-    const date = new Date().toLocaleDateString('no-NO', {day:'2-digit', month:'2-digit'});
-    
-    let history = JSON.parse(localStorage.getItem('nsf_v4_' + id)) || [];
-    const oldMax = history.length > 0 ? Math.max(...history.map(h => h.weight)) : 0;
-    
-    if (weightVal > oldMax && history.length > 0) {
-        document.getElementById('pers-' + id).style.display = 'flex';
-    }
+    const dateShort = new Date().toLocaleDateString('no-NO', {day:'2-digit', month:'2-digit'});
 
-    history.unshift({ weight: weightVal, date: date, mood: currentMood });
-    localStorage.setItem('nsf_v4_' + id, JSON.stringify(history.slice(0,10)));
-    
-    updateView(day);
+    let history = JSON.parse(localStorage.getItem('ragnhild_' + id)) || [];
+    const oldMax = history.length > 0 ? Math.max(...history.map(h => h.weight)) : 0;
+    const isNewPers = weightVal > oldMax && history.length > 0;
+
+    history.unshift({ weight: weightVal, date: dateShort, mood: currentMood });
+    localStorage.setItem('ragnhild_' + id, JSON.stringify(history.slice(0, 10)));
+
+    refreshCard(id, isNewPers, weightVal, dateShort);
+}
+
+function refreshCard(id, isNewPers, newWeight, newDate) {
+    const input = document.getElementById('in-' + id);
+    if (input) { input.value = newWeight; input.placeholder = 'Sist: ' + newWeight + ' kg'; }
+    const persEl = document.getElementById('pers-' + id);
+    if (persEl && isNewPers) persEl.style.display = 'flex';
+    const dateEl = document.getElementById('date-' + id);
+    if (dateEl) dateEl.textContent = newDate;
+    showStatus();
+    renderWeekBox();
+}
+
+function setDur(id, seconds, el) {
+    timerDurations[id] = seconds;
+    el.closest('.timer-durations').querySelectorAll('.btn-dur').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
 }
 
 function startTimer(id) {
-    if (activeTimers[id]) return;
     const btn = document.getElementById('timer-' + id);
-    let timeLeft = 120;
+    if (activeTimers[id]) {
+        clearInterval(activeTimers[id]);
+        delete activeTimers[id];
+        btn.innerText = 'Start pause';
+        btn.className = 'btn-timer';
+        return;
+    }
+    let timeLeft = timerDurations[id] || 120;
     btn.classList.add('running');
+    btn.innerText = `${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2,'0')}`;
     activeTimers[id] = setInterval(() => {
         timeLeft--;
         btn.innerText = `${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2,'0')}`;
         if (timeLeft <= 0) {
             clearInterval(activeTimers[id]);
             delete activeTimers[id];
-            btn.innerText = "KLAR!";
+            btn.innerText = "KLAR! ✓";
             btn.classList.replace('running', 'finished');
             if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+            setTimeout(() => { if(btn) { btn.innerText = 'Start pause'; btn.className = 'btn-timer'; }}, 4000);
         }
     }, 1000);
 }
 
+function doResetAllSets() {
+    ['1','2','3'].forEach(d => {
+        program[d].forEach(ex => {
+            const numSets = getSetCount(ex.i);
+            for(let i = 1; i <= numSets; i++) {
+                localStorage.removeItem(`ragnhild_set_${ex.id}_${i}`);
+            }
+        });
+    });
+}
+
+function resetAllSets(day) {
+    if(!confirm(`Vil du nullstille alle sirkler for Dag ${day}?`)) return;
+    doResetAllSets();
+    updateView(day);
+}
+
+function checkWeeklyReset() {
+    const getMonday = (d) => {
+        const date = new Date(d);
+        const diff = (date.getDay() === 0 ? -6 : 1 - date.getDay());
+        date.setDate(date.getDate() + diff);
+        date.setHours(0,0,0,0);
+        return date.toISOString().split('T')[0];
+    };
+    const thisMonday = getMonday(new Date());
+    const lastReset = localStorage.getItem('ragnhild_last_weekly_reset');
+    if (lastReset !== thisMonday) {
+        doResetAllSets();
+        localStorage.setItem('ragnhild_last_weekly_reset', thisMonday);
+        if (lastReset) showWeeklyResetBanner();
+    }
+}
+
+function showWeeklyResetBanner() {
+    const banner = document.createElement('div');
+    banner.innerText = '📅 Ny uke — alle sett er nullstilt!';
+    banner.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#2980b9;color:white;padding:10px 20px;border-radius:20px;z-index:1000;font-weight:bold;font-size:0.9em;box-shadow:0 4px 10px rgba(0,0,0,0.2);';
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), 4000);
+}
+
+function renderNoteArea(day) {
+    const key = 'ragnhild_note_day' + day;
+    const notes = JSON.parse(localStorage.getItem(key)) || [];
+    const latest = notes[0] || null;
+    document.getElementById('note-area').innerHTML = `
+        <div class="note-box">
+            <span class="note-label">📝 Notat for dag ${day}</span>
+            <textarea class="note-input" id="note-input-${day}" rows="2" placeholder="Hvordan gikk økten? Noe som kjentes tungt eller bra?">${latest ? latest.text : ''}</textarea>
+            <div class="note-footer">
+                <span class="note-saved">${latest ? 'Lagret ' + latest.date : 'Ikke lagret enda'}</span>
+                <button class="btn-note-save" onclick="saveNote('${day}')">Lagre notat</button>
+            </div>
+        </div>`;
+}
+
+function saveNote(day) {
+    const key = 'ragnhild_note_day' + day;
+    const text = document.getElementById('note-input-' + day).value.trim();
+    if (!text) return;
+    const notes = JSON.parse(localStorage.getItem(key)) || [];
+    const dateShort = new Date().toLocaleDateString('no-NO', {day:'2-digit', month:'2-digit'});
+    notes.unshift({ text, date: dateShort });
+    localStorage.setItem(key, JSON.stringify(notes.slice(0, 10)));
+    renderNoteArea(day);
+}
+
+function renderWeekBox() {
+    const getMonday = (d) => {
+        const date = new Date(d);
+        const diff = (date.getDay() === 0 ? -6 : 1 - date.getDay());
+        date.setDate(date.getDate() + diff);
+        date.setHours(0,0,0,0);
+        return date.toISOString().split('T')[0];
+    };
+    const thisMonday = getMonday(new Date());
+    const lastMonday = (() => { const d = new Date(thisMonday); d.setDate(d.getDate()-7); return d.toISOString().split('T')[0]; })();
+
+    const countSets = (monday) => {
+        const end = new Date(monday); end.setDate(end.getDate()+7);
+        let sets = 0, days = new Set();
+        ['1','2','3'].forEach(d => {
+            program[d].forEach(ex => {
+                const hist = JSON.parse(localStorage.getItem('ragnhild_' + ex.id)) || [];
+                hist.forEach(h => {
+                    if (!h.date) return;
+                    const [dd,mm] = h.date.split('.');
+                    const entry = new Date(new Date().getFullYear(), mm-1, dd);
+                    if (entry >= new Date(monday) && entry < end) { sets++; days.add(h.date); }
+                });
+            });
+        });
+        return { sets, days: days.size };
+    };
+
+    const tw = countSets(thisMonday), lw = countSets(lastMonday);
+    const fmtDiff = (n, unit) => n > 0 ? `<span class="diff-up">▲ ${n} ${unit}</span>` : n < 0 ? `<span class="diff-down">▼ ${Math.abs(n)} ${unit}</span>` : `<span class="diff-same">= samme</span>`;
+
+    document.getElementById('week-box').innerHTML = `
+        <div class="week-title">📅 DENNE UKEN</div>
+        <div class="week-stats">
+            <div class="week-stat"><div class="week-stat-val">${tw.days}</div><div class="week-stat-lbl">Dager</div><div class="week-stat-diff">${fmtDiff(tw.days-lw.days,'')}</div></div>
+            <div class="week-stat"><div class="week-stat-val">${tw.sets}</div><div class="week-stat-lbl">Loggede sett</div><div class="week-stat-diff">${fmtDiff(tw.sets-lw.sets,'sett')}</div></div>
+            <div class="week-stat"><div class="week-stat-val">${lw.sets}</div><div class="week-stat-lbl">Forrige uke</div><div class="week-stat-diff">&nbsp;</div></div>
+        </div>`;
+}
+
+function showStatus() {
+    const s = document.getElementById('status');
+    s.style.display = 'block';
+    setTimeout(() => s.style.display = 'none', 3000);
+}
+
 function drawChart(id, title) {
-    const hist = JSON.parse(localStorage.getItem('nsf_v4_' + id)) || [];
+    const hist = JSON.parse(localStorage.getItem('ragnhild_' + id)) || [];
     if (hist.length < 2) return;
     const dataArray = [['Dato', 'Kg']];
-    [...hist].reverse().forEach(h => dataArray.push([h.date, h.weight]));
+    [...hist].reverse().forEach(h => dataArray.push([h.date, parseFloat(h.weight)]));
     const data = google.visualization.arrayToDataTable(dataArray);
     const chart = new google.visualization.LineChart(document.getElementById('chart-' + id));
-    chart.draw(data, { title: title, curveType: 'function', legend: 'none', colors: ['#e67e22'], backgroundColor: 'transparent' });
+    chart.draw(data, { title: title, curveType: 'function', legend: 'none', colors: ['#e67e22'], backgroundColor: 'transparent', chartArea: { width: '85%', height: '70%' } });
 }
 
 function toggleHistory(id, title) {
@@ -226,12 +509,15 @@ function toggleHistory(id, title) {
     area.style.display = isOpen ? 'none' : 'block';
     if(!isOpen) {
         setTimeout(() => drawChart(id, title), 100);
-        const hist = JSON.parse(localStorage.getItem('nsf_v4_' + id)) || [];
-        document.getElementById('hist-list-' + id).innerHTML = hist.map(h => `<div class="history-item"><span>${h.date} ${h.mood || ''}</span><strong>${h.weight} kg</strong></div>`).join('');
+        const hist = JSON.parse(localStorage.getItem('ragnhild_' + id)) || [];
+        document.getElementById('hist-list-' + id).innerHTML = hist.map(h => `
+            <div class="history-item"><span>${h.date} ${h.mood || ''}</span><strong>${h.weight} kg</strong></div>
+        `).join('') || 'Ingen logg';
     }
 }
 
-updateView(localStorage.getItem('nsf_last_day') || '1');
+checkWeeklyReset();
+updateView(localStorage.getItem('ragnhild_last_day') || '1');
 </script>
 </body>
 </html>
