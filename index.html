@@ -60,6 +60,12 @@
         .header { 
             text-align: center; padding: 15px 0; background: rgba(44, 62, 80, 0.95); 
             color: white; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .backup-btn {
+            position: absolute; top: 15px; right: 15px; background: transparent; border: 1px solid rgba(255,255,255,0.5); 
+            color: white; border-radius: 6px; padding: 5px 8px; font-size: 0.8em; cursor: pointer;
         }
 
         .container { max-width: 500px; margin: auto; }
@@ -70,6 +76,8 @@
             border-left: 6px solid var(--secondary);
         }
         .week-title { font-weight: bold; color: var(--secondary); font-size: 0.85em; margin-bottom: 10px; text-transform: uppercase; }
+        
+        /* Gammel statusboks-styling tilbake */
         .week-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
         .week-stat { background: var(--history-bg); border-radius: 10px; padding: 10px; text-align: center; border: 1px solid var(--history-border); }
         .week-stat-val { font-size: 1.4em; font-weight: 900; color: var(--primary); }
@@ -107,30 +115,32 @@
             width: 34px; height: 34px; border: 2px solid var(--dot-border); border-radius: 50%; 
             cursor: pointer; display: flex; align-items: center; justify-content: center; 
             font-size: 0.9em; color: var(--dot-text); font-weight: bold; background: var(--dot-bg);
+            transition: all 0.2s;
         }
-        .set-dot.done { background: var(--success); border-color: var(--success); color: white; }
+        .set-dot.done { background: var(--success); border-color: var(--success); color: white; transform: scale(1.1); }
 
         .ex-desc { font-size: 0.9em; color: var(--text-muted); margin-bottom: 10px; }
         .video-btn { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; padding: 6px 12px; background: var(--video); color: white; text-decoration: none; border-radius: 6px; font-size: 0.8em; font-weight: bold; }
 
         .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        input[type=number] { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 10px; font-size: 18px; box-sizing: border-box; background: var(--dot-bg); color: var(--text); }
+        input[type=text] { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 10px; font-size: 18px; box-sizing: border-box; background: var(--dot-bg); color: var(--text); }
         .btn-save { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; }
 
         .timer-container { grid-column: span 2; margin-top: 5px; }
-        .btn-timer { width: 100%; padding: 14px; background: var(--secondary); color: white; border: none; border-radius: 10px; font-size: 1em; font-weight: bold; cursor: pointer; }
+        .btn-timer { width: 100%; padding: 14px; background: var(--secondary); color: white; border: none; border-radius: 10px; font-size: 1em; font-weight: bold; cursor: pointer; transition: background 0.3s;}
         .btn-timer.running { background: #e67e22; }
         .btn-timer.finished { background: var(--success); }
 
-        .btn-reset-day { background: #666; color: white; border: none; padding: 18px; border-radius: 12px; font-weight: bold; width: 100%; margin: 20px 0 50px 0; cursor: pointer; }
+        .btn-reset-day { background: #e74c3c; color: white; border: none; padding: 18px; border-radius: 12px; font-weight: bold; width: 100%; margin: 20px 0 50px 0; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 
         .footer-btns { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 12px; }
         .btn-small { background: transparent; border: 1px solid var(--dot-border); font-size: 0.8em; padding: 8px 12px; color: var(--text-muted); border-radius: 8px; cursor: pointer; }
         .last-date { font-size: 0.8em; color: var(--text-muted); }
         
         .history-area { margin-top: 10px; padding: 10px; background: var(--history-bg); border-radius: 8px; display: none; border: 1px solid var(--history-border); }
-        .chart-div { width: 100%; height: 150px; margin-bottom: 10px; }
-        .history-item { font-size: 0.8em; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding: 5px 0; color: var(--text); }
+        .chart-div { width: 100%; height: 200px; margin-bottom: 10px; }
+        .history-item { font-size: 0.8em; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding: 8px 0; color: var(--text); }
+        .history-item:last-child { border-bottom: none; }
 
         .note-box {
             background: var(--card); border-radius: 12px; margin-bottom: 15px;
@@ -160,6 +170,7 @@
 <div class="container">
     <div class="header">
         <h2 style="margin:0">Ragnhild Supersterk Pro 💪</h2>
+        <button class="backup-btn" onclick="exportData()">💾 Lagre data</button>
     </div>
 
     <div id="week-box" class="week-box"></div>
@@ -194,10 +205,12 @@
 </div>
 
 <script>
+// Laster inn Google Charts skikkelig
 google.charts.load('current', {'packages':['corechart']});
 
 let activeTimers = {};
 let currentMood = "";
+let currentDay = localStorage.getItem('ragnhild_last_day') || '1';
 
 const program = {
     "1": [
@@ -235,6 +248,7 @@ function getSetCount(infoString) {
 function toggleSet(exId, setNum, element) {
     element.classList.toggle('done');
     localStorage.setItem(`ragnhild_set_${exId}_${setNum}`, element.classList.contains('done'));
+    renderWeekBox(); // Oppdater antall loggete sett
 }
 
 function setMood(emoji) {
@@ -243,6 +257,7 @@ function setMood(emoji) {
 }
 
 function updateView(day) {
+    currentDay = day;
     localStorage.setItem('ragnhild_last_day', day);
     document.querySelectorAll('.btn-day').forEach(b => b.classList.remove('active'));
     document.getElementById('btn-' + day).classList.add('active');
@@ -268,39 +283,52 @@ function updateView(day) {
             <div class="ex-desc">${ex.d} ${ex.v ? `<br><a href="${ex.v}" target="_blank" class="video-btn">Se video 🎥</a>` : ''}</div>
             <div class="set-tracker">${setDotsHtml}</div>
             <div class="input-row">
-                <input type="number" id="in-${ex.id}" placeholder="${lastWeight || 'kg'}" inputmode="decimal" value="${lastWeight}">
+                <!-- Endret type til text for å la folk bruke både punktum og komma på mobil -->
+                <input type="text" id="in-${ex.id}" placeholder="${lastWeight ? lastWeight + ' kg' : 'Vekt (kg)'}" inputmode="decimal" value="${lastWeight}">
                 <button class="btn-save" onclick="save('${ex.id}', '${day}')">Lagre</button>
                 ${ex.timer ? `<div class="timer-container"><button id="timer-${ex.id}" class="btn-timer" onclick="startTimer('${ex.id}')">Start pause (2m)</button></div>` : ''}
             </div>
             <div class="footer-btns">
-                <button class="btn-small" onclick="toggleHistory('${ex.id}', '${ex.t}')">Logg & Graf</button>
+                <button class="btn-small" onclick="toggleHistory('${ex.id}', '${ex.t}')">Logg & Graf 📊</button>
                 <span class="last-date" id="date-${ex.id}">${lastDate}</span>
             </div>
             <div class="history-area" id="hist-area-${ex.id}">
-                <div id="chart-${ex.id}" class="chart-div"></div>
+                <div id="chart-${ex.id}" class="chart-div">Laster graf...</div>
                 <div id="hist-list-${ex.id}"></div>
             </div>
         </div>`;
     }).join('');
 
-    html += `<button class="btn-reset-day" onclick="resetAllSets('${day}')">🔄 Nullstill sirkler for ny uke</button>`;
+    html += `<button class="btn-reset-day" onclick="resetAllSets('${day}')">🔄 Nullstill sirkler for dagens økt</button>`;
     container.innerHTML = html;
     renderNoteArea(day);
     renderWeekBox();
 }
 
 function save(id, day) {
-    const val = document.getElementById('in-' + id).value;
+    let val = document.getElementById('in-' + id).value;
     if(!val) return;
+    
+    // Fiks slik at komma gjøres om til punktum før lagring
+    val = val.replace(',', '.');
     const weightVal = parseFloat(val);
+    if(isNaN(weightVal)) return;
+
     const dateShort = new Date().toLocaleDateString('no-NO', {day:'2-digit', month:'2-digit'});
 
     let history = JSON.parse(localStorage.getItem('ragnhild_' + id)) || [];
     const oldMax = history.length > 0 ? Math.max(...history.map(h => h.weight)) : 0;
     const isNewPers = weightVal > oldMax && history.length > 0;
 
-    history.unshift({ weight: weightVal, date: dateShort, mood: currentMood });
-    localStorage.setItem('ragnhild_' + id, JSON.stringify(history.slice(0, 10)));
+    // Sjekk at vi ikke spammer samme logg på samme dag flere ganger på rad, oppdaterer heller
+    if(history.length > 0 && history[0].date === dateShort) {
+        history[0].weight = weightVal;
+        history[0].mood = currentMood || history[0].mood;
+    } else {
+        history.unshift({ weight: weightVal, date: dateShort, mood: currentMood });
+    }
+    
+    localStorage.setItem('ragnhild_' + id, JSON.stringify(history.slice(0, 15)));
 
     refreshCard(id, isNewPers, weightVal, dateShort);
 }
@@ -309,16 +337,31 @@ function refreshCard(id, isNewPers, newWeight, newDate) {
     const input = document.getElementById('in-' + id);
     if (input) { input.value = newWeight; input.placeholder = newWeight + ' kg'; }
     const persEl = document.getElementById('pers-' + id);
-    if (persEl && isNewPers) persEl.style.display = 'flex';
+    if (persEl && isNewPers) {
+        persEl.style.display = 'flex';
+        setTimeout(() => { persEl.style.display = 'none'; }, 5000);
+    }
     const dateEl = document.getElementById('date-' + id);
     if (dateEl) dateEl.textContent = newDate;
+    
+    // Tving oppdatering av graf hvis den er åpen
+    const area = document.getElementById('hist-area-' + id);
+    if(area && area.style.display === 'block') {
+        drawChart(id);
+    }
+    
     showStatus();
-    renderWeekBox();
 }
 
 function startTimer(id) {
     const btn = document.getElementById('timer-' + id);
-    if (activeTimers[id]) { clearInterval(activeTimers[id]); delete activeTimers[id]; btn.innerText = 'Start pause (2m)'; btn.className = 'btn-timer'; return; }
+    if (activeTimers[id]) { 
+        clearInterval(activeTimers[id]); 
+        delete activeTimers[id]; 
+        btn.innerText = 'Start pause (2m)'; 
+        btn.className = 'btn-timer'; 
+        return; 
+    }
     let timeLeft = 120;
     btn.classList.add('running');
     activeTimers[id] = setInterval(() => {
@@ -334,8 +377,10 @@ function startTimer(id) {
 }
 
 function resetAllSets(day) {
-    if(!confirm("Nullstill alle sirkler?")) return;
-    ['1','2','3'].forEach(d => program[d].forEach(ex => { for(let i=1; i<=10; i++) localStorage.removeItem(`ragnhild_set_${ex.id}_${i}`); }));
+    if(!confirm("Er du sikker på at du vil nullstille alle sirkler for i dag?")) return;
+    program[day].forEach(ex => { 
+        for(let i=1; i<=10; i++) localStorage.removeItem(`ragnhild_set_${ex.id}_${i}`); 
+    });
     updateView(day);
 }
 
@@ -346,23 +391,12 @@ function renderNoteArea(day) {
     document.getElementById('note-area').innerHTML = `
         <div class="note-box">
             <span class="note-label">📝 Notat for dag ${day}</span>
-            <textarea class="note-input" id="note-input-${day}" rows="2" placeholder="Hvordan gikk økten?">${latest ? latest.text : ''}</textarea>
+            <textarea class="note-input" id="note-input-${day}" rows="2" placeholder="Hvordan gikk økten? (Gode øvelser, vondt noen steder?)">${latest ? latest.text : ''}</textarea>
             <div class="note-footer">
-                <span class="note-saved">${latest ? 'Lagret ' + latest.date : 'Ikke lagret enda'}</span>
+                <span class="note-saved">${latest ? 'Sist lagret ' + latest.date : ''}</span>
                 <button class="btn-note-save" onclick="saveNote('${day}')">Lagre notat</button>
             </div>
         </div>`;
-}
-
-function saveNote(day) {
-    const key = 'ragnhild_note_day' + day;
-    const text = document.getElementById('note-input-' + day).value.trim();
-    if (!text) return;
-    let notes = JSON.parse(localStorage.getItem(key)) || [];
-    const dateShort = new Date().toLocaleDateString('no-NO', {day:'2-digit', month:'2-digit'});
-    notes.unshift({ text, date: dateShort });
-    localStorage.setItem(key, JSON.stringify(notes.slice(0, 10)));
-    renderNoteArea(day);
 }
 
 function renderWeekBox() {
@@ -388,17 +422,86 @@ function showStatus() {
     setTimeout(() => s.style.display = 'none', 3000);
 }
 
+// Ny oppdatert funksjon som faktisk tegner grafen!
 function toggleHistory(id, title) {
     const area = document.getElementById('hist-area-' + id);
     const isOpen = area.style.display === 'block';
     area.style.display = isOpen ? 'none' : 'block';
+    
     if(!isOpen) {
-        let hist = JSON.parse(localStorage.getItem('ragnhild_' + id)) || [];
-        document.getElementById('hist-list-' + id).innerHTML = hist.map(h => `<div class="history-item"><span>${h.date} ${h.mood || ''}</span><strong>${h.weight} kg</strong></div>`).join('') || 'Ingen logg';
+        drawChart(id);
     }
 }
 
-updateView(localStorage.getItem('ragnhild_last_day') || '1');
+function drawChart(id) {
+    let hist = JSON.parse(localStorage.getItem('ragnhild_' + id)) || [];
+    
+    // Tegn liste
+    document.getElementById('hist-list-' + id).innerHTML = hist.map(h => 
+        `<div class="history-item"><span>${h.date} ${h.mood || ''}</span><strong>${h.weight} kg</strong></div>`
+    ).join('') || '<div style="text-align:center;color:var(--text-muted);padding:10px;">Ingen logg enda</div>';
+
+    // Tegn graf via Google Charts
+    if (hist.length > 1) {
+        if (typeof google !== 'undefined' && google.visualization) {
+            let data = new google.visualization.DataTable();
+            data.addColumn('string', 'Dato');
+            data.addColumn('number', 'Vekt');
+            
+            // Reverser listen for at eldste skal være til venstre på grafen
+            let rows = hist.slice().reverse().map(h => [h.date, h.weight]);
+            data.addRows(rows);
+            
+            let isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            let textColor = isDark ? '#ffffff' : '#333333';
+            let gridColor = isDark ? '#374151' : '#e0e0e0';
+
+            let options = { 
+                legend: 'none',
+                backgroundColor: 'transparent', 
+                colors: ['#e67e22'],
+                chartArea: {width: '85%', height: '80%'},
+                vAxis: { textStyle: {color: textColor}, gridlines: {color: gridColor}, baselineColor: gridColor },
+                hAxis: { textStyle: {color: textColor, fontSize: 10} },
+                pointSize: 5,
+                lineWidth: 3
+            };
+            
+            let chart = new google.visualization.LineChart(document.getElementById('chart-' + id));
+            chart.draw(data, options);
+        } else {
+             document.getElementById('chart-' + id).innerHTML = '<div style="padding:10px;text-align:center;color:var(--text-muted);">Laster graf-verktøy... Prøv igjen om et sekund.</div>';
+        }
+    } else {
+        document.getElementById('chart-' + id).innerHTML = '<div style="padding:40px 10px;text-align:center;color:var(--text-muted);">Trenger minst 2 loggføringer for å tegne graf. 📈</div>';
+    }
+}
+
+// Backup-funksjon
+function exportData() {
+    let data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('ragnhild_')) {
+            data[key] = localStorage.getItem(key);
+        }
+    }
+    
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "ragnhild_trening_backup.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+}
+
+// Initialize
+google.charts.setOnLoadCallback(() => {
+    // Re-tegn evt åpne grafer når charts api er klart
+});
+updateView(currentDay);
+
 </script>
 </body>
 </html>
