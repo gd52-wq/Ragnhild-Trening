@@ -104,34 +104,45 @@
         const ExerciseCard = ({ exercise, activeWorkoutId, completedSets, toggleSet, startTimer }) => {
           const histKey = `ragnhild_${exercise.id}`;
           
-          // State for historikk og input
+          // State for historikk og input - Henter forrige raw input hvis tilgjengelig, ellers vekt
           const [history, setHistory] = useState(() => JSON.parse(localStorage.getItem(histKey)) || []);
-          const [weightInput, setWeightInput] = useState(history.length > 0 ? history[0].weight : '');
+          const [weightInput, setWeightInput] = useState(history.length > 0 ? (history[0].rawWeight || history[0].weight) : '');
           const [showHistory, setShowHistory] = useState(false);
           const [showSavedMsg, setShowSavedMsg] = useState(false);
           const [showPersMsg, setShowPersMsg] = useState(false);
 
           const saveWeight = () => {
             if (!weightInput) return;
-            // Tillat komma som desimal
-            const weightVal = parseFloat(weightInput.toString().replace(',', '.'));
-            if (isNaN(weightVal)) return;
-
+            
+            // SMART PARSING: Finn alle tall for å støtte f.eks. "20 - 25 - 30"
+            // Bytter ut komma med punktum midlertidig for å håndtere desimaler korrekt
+            const normalizedInput = weightInput.toString().replace(/,/g, '.');
+            const numbersFound = normalizedInput.match(/\d+(\.\d+)?/g);
+            
+            if (!numbersFound) return; // Avbryt om ingen tall ble funnet
+            
+            // Henter ut toppvekten som ble skrevet inn (f.eks max av 20, 25, 30 -> 30)
+            const topWeightVal = Math.max(...numbersFound.map(Number));
             const dateShort = new Date().toLocaleDateString('no-NO', {day:'2-digit', month:'2-digit'});
             let newHistory = [...history];
 
-            // Sjekk for ny pers!
+            // Sjekk for ny pers basert på toppvekt!
             const oldMax = history.length > 0 ? Math.max(...history.map(h => h.weight)) : 0;
-            if (weightVal > oldMax && history.length > 0) {
+            if (topWeightVal > oldMax && history.length > 0) {
                 setShowPersMsg(true);
                 setTimeout(() => setShowPersMsg(false), 4000);
             }
 
             // Oppdater logg for i dag, ellers lag ny oppføring
             if (newHistory.length > 0 && newHistory[0].date === dateShort) {
-                newHistory[0].weight = weightVal;
+                newHistory[0].weight = topWeightVal;
+                newHistory[0].rawWeight = weightInput.toString(); // Lagrer hele tekststrengen (serien)
             } else {
-                newHistory.unshift({ weight: weightVal, date: dateShort });
+                newHistory.unshift({ 
+                    weight: topWeightVal, 
+                    rawWeight: weightInput.toString(), 
+                    date: dateShort 
+                });
             }
             
             newHistory = newHistory.slice(0, 15); // Behold kun siste 15
@@ -203,12 +214,12 @@
                 })}
               </div>
 
-              {/* Input for Vekt og Lagring */}
+              {/* Input for Vekt og Lagring (Oppdatert for serier / tekst) */}
               <div className="flex gap-2 mt-5">
                 <input 
                   type="text" 
-                  inputMode="decimal"
-                  placeholder="Vekt (kg)"
+                  inputMode="text"
+                  placeholder="F.eks: 20 - 25 - 30"
                   value={weightInput}
                   onChange={(e) => setWeightInput(e.target.value)}
                   className="flex-1 bg-white/90 border-2 border-slate-300 text-slate-900 font-bold rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all shadow-sm"
@@ -255,7 +266,7 @@
                                 >
                                   {/* Tooltip for vekt hover */}
                                   <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs font-bold py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none shadow-lg">
-                                    {h.weight} kg
+                                    Topp: {h.weight}
                                   </div>
                                 </div>
                                 {/* Forenklet dato */}
@@ -268,12 +279,14 @@
                         </div>
                       )}
                       
-                      {/* Liste over økter */}
+                      {/* Liste over økter - Viser rawWeight slik at man ser hele serien ("20 - 25 - 30") */}
                       <div className="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
                         {history.map((h, i) => (
                           <div key={i} className="flex justify-between items-center text-sm border-b border-slate-200/60 pb-2">
                             <span className="text-slate-600 font-medium">{h.date}</span>
-                            <span className="font-bold text-slate-800 bg-white px-2 py-0.5 rounded shadow-sm border border-slate-200">{h.weight} kg</span>
+                            <span className="font-bold text-slate-800 bg-white px-2 py-0.5 rounded shadow-sm border border-slate-200">
+                                {h.rawWeight || h.weight} kg
+                            </span>
                           </div>
                         ))}
                       </div>
