@@ -310,7 +310,7 @@
 
         // --- Hovedappen ---
         function App() {
-          const [activeWorkoutId, setActiveWorkoutId] = useState(null);
+          const [activeWorkoutId, setActiveWorkoutId] = useState(() => localStorage.getItem('ragnhild_active_workout') || null);
           const [workoutHistory, setWorkoutHistory] = useState(() => {
             const saved = localStorage.getItem('ragnhild_workout_history');
             return saved ? JSON.parse(saved) : {};
@@ -319,11 +319,27 @@
           const [timeLeft, setTimeLeft] = useState(0);
           const [isTimerRunning, setIsTimerRunning] = useState(false);
           const [timerMax, setTimerMax] = useState(90);
-          const [completedSets, setCompletedSets] = useState({});
+          const [completedSets, setCompletedSets] = useState(() => {
+            const saved = localStorage.getItem('ragnhild_completed_sets');
+            return saved ? JSON.parse(saved) : {};
+          });
 
           useEffect(() => {
             localStorage.setItem('ragnhild_workout_history', JSON.stringify(workoutHistory));
           }, [workoutHistory]);
+
+          // NYTT: Lagrer aktiv økt og grønne prikker i minnet fortløpende
+          useEffect(() => {
+            if (activeWorkoutId) {
+                localStorage.setItem('ragnhild_active_workout', activeWorkoutId);
+            } else {
+                localStorage.removeItem('ragnhild_active_workout');
+            }
+          }, [activeWorkoutId]);
+
+          useEffect(() => {
+            localStorage.setItem('ragnhild_completed_sets', JSON.stringify(completedSets));
+          }, [completedSets]);
 
           // PRO-TIPS: Forbedret Timer med Vibrasjon
           useEffect(() => {
@@ -386,6 +402,9 @@
             
             setCompletedSets({});
             setActiveWorkoutId(null);
+            // NYTT: Sletter den midlertidige hukommelsen når økten er ferdig
+            localStorage.removeItem('ragnhild_active_workout');
+            localStorage.removeItem('ragnhild_completed_sets');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           };
 
